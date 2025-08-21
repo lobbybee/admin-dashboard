@@ -1,0 +1,174 @@
+<template>
+  <div class="min-h-screen bg-surface-50 text-surface-800">
+    <div class="flex h-screen overflow-hidden">
+      <!-- Mobile Drawer -->
+      <Drawer v-model:visible="sidebarVisible" position="left" :pt="{ content: { class: 'p-0' } }" class="w-72 md:hidden">
+        <MainSideBar
+          :user-role="userRole"
+          :navigation="navigation"
+          @navigate="sidebarVisible = false"
+        />
+      </Drawer>
+
+      <!-- Desktop Sidebar -->
+      <aside class="hidden w-72 flex-shrink-0 border-r border-surface-200 bg-surface-0 md:flex md:flex-col">
+        <MainSideBar :user-role="userRole" :navigation="navigation" />
+      </aside>
+
+      <!-- Main Content -->
+      <div class="flex flex-1 flex-col overflow-hidden">
+        <!-- Main Header -->
+        <header class="flex h-16 flex-shrink-0 items-center justify-between border-b border-surface-200 bg-white px-4 sm:px-6">
+          <div class="flex items-center gap-3">
+            <Button
+              @click="sidebarVisible = true"
+              rounded
+              text
+              class="md:hidden"
+              aria-label="Toggle sidebar"
+            >
+              <template #icon>
+                <Icon name="prime:bars" class="h-5 w-5" />
+              </template>
+            </Button>
+            <div>
+              <h1 class="text-lg font-semibold text-surface-900">{{ pageTitle }}</h1>
+              <p class="text-xs text-surface-500">{{ hotel.name }}</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 sm:gap-4">
+            <div class="hidden items-center gap-2 lg:flex">
+              <div class="h-2 w-2 animate-pulse rounded-full bg-green-500" />
+              <span class="text-sm font-medium text-surface-700">WhatsApp Connected</span>
+            </div>
+
+            <Button text rounded aria-label="Notifications">
+              <template #icon>
+                <Icon name="prime:bell" class="h-5 w-5" />
+              </template>
+              <Badge v-if="totalUnreadMessages > 0" :value="totalUnreadMessages" severity="danger" />
+            </Button>
+
+            <div class="relative">
+              <Button @click="toggleUserMenu" text class="flex items-center gap-2 rounded-full p-1 text-left">
+                <Avatar :label="userInitials" shape="circle" class="bg-gradient-to-br from-orange-400 to-blue-400 text-white" />
+                <div class="hidden xl:block">
+                  <p class="truncate text-sm font-semibold text-surface-800">
+                    {{ user?.first_name }} {{ user?.last_name }}
+                  </p>
+                  <p class="text-xs text-surface-500">
+                    {{ userRole === 'manager' || userRole === 'hotel_admin' ? 'Manager' : 'Receptionist' }}
+                  </p>
+                </div>
+                <Icon name="prime:chevron-down" class="hidden h-3 w-3 text-surface-500 xl:block" />
+              </Button>
+              <Menu ref="userMenu" :model="userMenuItems" :popup="true" class="mt-2 w-60">
+                <template #item="{ item, props }">
+                  <div v-if="item.separator" class="my-1 border-t border-surface-200" />
+                  <NuxtLink v-else-if="item.route" :to="item.route" class="flex cursor-pointer items-center rounded-md p-2 hover:bg-surface-100" v-bind="props.action">
+                    <Icon :name="item.icon" class="mr-2 h-5 w-5" />
+                    <span>{{ item.label }}</span>
+                  </NuxtLink>
+                  <a v-else @click="item.command" class="flex cursor-pointer items-center rounded-md p-2 hover:bg-surface-100" v-bind="props.action">
+                    <Icon :name="item.icon" class="mr-2 h-5 w-5" />
+                    <span>{{ item.label }}</span>
+                  </a>
+                </template>
+              </Menu>
+            </div>
+          </div>
+        </header>
+
+        <!-- Page Content -->
+        <main class="flex-1 overflow-y-auto p-4 sm:p-6">
+          <slot />
+        </main>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { storeToRefs } from 'pinia';
+import { useAPI } from '~/composables/useAPI';
+import { useAuthStore } from '~/stores/auth';
+
+const router = useRouter();
+const route = useRoute();
+const { logout } = useAPI();
+const authStore = useAuthStore();
+const { user, isAuthenticated, userRole, userInitials } = storeToRefs(authStore);
+
+const userMenu = ref(null);
+
+const hotel = ref({ name: 'Loading...' });
+const totalUnreadMessages = ref(0); // Mocked for now
+const sidebarVisible = ref(false);
+
+const navigation = [
+  { name: 'Dashboard', href: '/', icon: 'prime:home' },
+  { name: 'Hotel Onboarding', href: '/hotel-onboarding', icon: 'prime:building' }
+];
+
+// Fetch hotel data will be triggered automatically by useQuery
+// when user.value.hotel_id becomes available.
+// const { HotelData, HotelIsLoading, HotelError } = useFetchHotel(computed(() => user.value?.hotel_id));
+const HotelData = ref(null);
+
+watch(HotelData, (newHotel) => {
+  if (newHotel) {
+    hotel.value = newHotel;
+  }
+});
+
+// Redirect to login if not authenticated
+watch(isAuthenticated, (isAuth) => {
+  if (process.client && !isAuth) {
+    navigateTo('/login');
+  }
+}, { immediate: true });
+
+const userMenuItems = ref([
+  {
+    label: 'Profile',
+    icon: 'prime:user',
+    route: '/hotel-profile' // Corrected route
+  },
+  {
+    label: 'Settings',
+    icon: 'prime:cog',
+    route: '/settings'
+  },
+  {
+    separator: true
+  },
+  {
+    label: 'Sign out',
+    icon: 'prime:sign-out',
+    command: () => handleLogout()
+  }
+]);
+
+const toggleUserMenu = (event) => {
+  userMenu.value.toggle(event);
+};
+
+const handleLogout = async () => {
+  try {
+    await logout();
+    await router.push('/login');
+  } catch (error) {
+    console.error('Logout failed:', error);
+  }
+};
+
+const pageTitle = computed(() => {
+  const titleMap = {
+    '/': 'Dashboard',
+    '/hotel-onboarding': 'Hotel Onboarding'
+  };
+  return titleMap[route.path] || 'Dashboard';
+});
+
+</script>
