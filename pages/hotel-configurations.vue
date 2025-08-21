@@ -15,7 +15,7 @@
           <!-- Hotel Selector -->
           <div class="mb-8">
             <h2 class="text-xl font-semibold text-gray-700 mb-3">Select a Hotel</h2>
-            <Dropdown 
+            <Dropdown
               v-model="selectedHotel"
               :options="hotels || []"
               optionLabel="name"
@@ -29,7 +29,7 @@
           <!-- Flow Template List -->
           <div v-if="selectedHotel">
             <h2 class="text-xl font-semibold text-gray-700 mb-4">Manage Flow Templates for {{ selectedHotel.name }}</h2>
-            
+
             <div v-if="isLoadingTemplates || isLoadingConfigs" class="flex justify-center p-8">
               <ProgressSpinner />
             </div>
@@ -37,8 +37,8 @@
               Error loading data.
             </div>
             <div v-else class="space-y-4">
-              <div 
-                v-for="template in combinedTemplates" 
+              <div
+                v-for="template in combinedTemplates"
                 :key="template.id"
                 class="p-4 border rounded-lg flex justify-between items-center transition-all"
                 :class="{ 'bg-green-50 border-green-200': template.is_active }"
@@ -48,7 +48,7 @@
                   <p class="text-gray-600">{{ template.description }}</p>
                   <p class="text-sm text-gray-500 mt-1">Trigger: <span class="font-mono bg-gray-200 px-2 py-1 rounded">{{ template.trigger_keyword }}</span></p>
                 </div>
-                <InputSwitch 
+                <InputSwitch
                   :modelValue="template.is_active"
                   @update:modelValue="(isActive) => handleFlowToggle(template, isActive)"
                 />
@@ -102,7 +102,7 @@ watch(selectedHotel, () => {
 // --- Computed Properties ---
 const combinedTemplates = computed(() => {
   if (!flowTemplates.value) return [];
-  
+
   return flowTemplates.value.map(template => {
     const config = hotelConfigs.value?.find(c => c.flow_template === template.id);
     return {
@@ -138,7 +138,7 @@ const handleFlowToggle = async (template: any, isActive: boolean) => {
   } catch (err) {
     toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to update flow configuration', life: 5000 });
     // Re-fetch to revert optimistic UI changes if needed, though modelValue should handle it
-    refetchConfigs(); 
+    refetchConfigs();
   }
 };
 
