@@ -5,19 +5,22 @@ export interface FlowTemplate {
   id: number;
   name: string;
   description: string;
-  trigger_keyword: string;
+  category: string;
+  is_active: boolean;
 }
 
 export interface FlowTemplateCreateData {
   name: string;
   description: string;
-  trigger_keyword: string;
+  category: string;
+  is_active: boolean;
 }
 
 export interface FlowTemplateUpdateData {
   name?: string;
   description?: string;
-  trigger_keyword?: string;
+  category?: string;
+  is_active?: boolean;
 }
 
 // Fetch all flow templates

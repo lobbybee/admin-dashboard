@@ -9,7 +9,9 @@ export interface FlowStepTemplate {
   message_type: string;
   message_template: string;
   order: number;
+  options: Record<string, string> | null;
   conditional_next_steps: Record<string, number> | null;
+  next_step_template: number | null;
 }
 
 export interface FlowStepTemplateCreateData {

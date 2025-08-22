@@ -1,104 +1,85 @@
 <template>
-  <div class="p-6 bg-gray-50 min-h-screen">
-    <div class="max-w-7xl mx-auto space-y-8">
-
-      <!-- Header -->
-      <header class="animate-fade-slide-down">
-        <h1 class="text-3xl font-bold text-gray-800 flex items-center gap-2">
-          <i class="pi pi-sitemap text-primary-500"></i> Flow Management
-        </h1>
-        <p class="text-gray-500">Design and manage conversational flows for your hotel.</p>
-      </header>
-
-      <!-- Main Content Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-12 gap-8" style="height: calc(100vh - 150px);">
-        <!-- Left Column: Flow Templates List -->
-        <div class="md:col-span-4 lg:col-span-3">
-          <FlowTemplateList
-            ref="templateListRef"
-            :selected-template-id="selectedTemplate?.id || null"
-            @template-selected="onTemplateSelected"
-            @template-updated="handleTemplateUpdate"
-          />
-        </div>
-
-        <!-- Right Column: Flow Steps Editor -->
-        <div class="md:col-span-8 lg:col-span-9">
-          <FlowEditor
-            :template="selectedTemplate"
-            @edit-template="editTemplate"
-            @delete-template="confirmDeleteTemplate"
-          />
-        </div>
-      </div>
+  <div class="flex h-screen">
+    <div class="w-1/4 bg-gray-100 p-4 overflow-y-auto border-r">
+      <h2 class="text-lg font-semibold mb-4">Flow Templates</h2>
+      <FlowTemplateList 
+        @template-selected="onTemplateSelected"
+        @create="openNewTemplateDialog"
+        @edit="openEditTemplateDialog"
+        @delete="deleteTemplate"
+      />
     </div>
 
-    <!-- Delete Confirmation Dialog -->
-    <Dialog v-model:visible="deleteDialogVisible" header="Confirm Delete" :modal="true" :style="{ width: '450px' }" :draggable="false">
-      <div class="flex items-center gap-4">
-        <i class="pi pi-exclamation-triangle text-3xl text-red-500"></i>
-        <span v-if="templateToDelete">
-          Are you sure you want to delete <b>{{ templateToDelete.name }}</b>? This action cannot be undone.
-        </span>
-      </div>
-      <template #footer>
-        <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="deleteDialogVisible = false" />
-        <Button label="Delete" icon="pi pi-trash" class="p-button-danger" @click="deleteTemplate" />
-      </template>
-    </Dialog>
+    <div class="w-3/4 p-4 overflow-y-auto">
+      <FlowEditor :flow-template-id="selectedTemplateId" />
+    </div>
+
+    <FlowTemplateDialog
+      v-if="isTemplateDialogVisible"
+      :template="editingTemplate"
+      @close="closeTemplateDialog"
+      @save="saveTemplate"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useToast } from 'primevue/usetoast';
-import Dialog from 'primevue/dialog';
-import Button from 'primevue/button';
 import FlowTemplateList from '~/components/FlowTemplateList.vue';
 import FlowEditor from '~/components/FlowEditor.vue';
-import { useDeleteFlowTemplate } from '~/composables/useFlowTemplate';
+import FlowTemplateDialog from '~/components/FlowTemplateDialog.vue';
+import { useCreateFlowTemplate, useUpdateFlowTemplate, useDeleteFlowTemplate, useFetchFlowTemplates, type FlowTemplate } from '~/composables/useFlowTemplate';
 
-const toast = useToast();
-const selectedTemplate = ref<any>(null);
-const templateListRef = ref<InstanceType<typeof FlowTemplateList> | null>(null);
+const selectedTemplateId = ref<number | null>(null);
+const isTemplateDialogVisible = ref(false);
+const editingTemplate = ref<Partial<FlowTemplate> | null>(null);
 
-const onTemplateSelected = (template: any) => {
-  console.log('Template selected:', template);
-  selectedTemplate.value = template;
+const { refetch: refetchTemplates } = useFetchFlowTemplates();
+const { createFlowTemplate } = useCreateFlowTemplate();
+const { updateFlowTemplate } = useUpdateFlowTemplate();
+const { deleteFlowTemplate } = useDeleteFlowTemplate();
+
+const onTemplateSelected = (id: number) => {
+  selectedTemplateId.value = id;
 };
 
-const handleTemplateUpdate = () => {
-  // When a template is created/updated, we might need to refresh the list
-  // The list component handles its own refetch, but we might want to clear the selection
+const openNewTemplateDialog = () => {
+  editingTemplate.value = { name: '', description: '', category: '', is_active: true };
+  isTemplateDialogVisible.value = true;
 };
 
-// --- Delete Logic ---
-const { mutateAsync: deleteFlowTemplateApi } = useDeleteFlowTemplate();
-const deleteDialogVisible = ref(false);
-const templateToDelete = ref<any>(null);
-
-const confirmDeleteTemplate = (template: any) => {
-  templateToDelete.value = template;
-  deleteDialogVisible.value = true;
+const openEditTemplateDialog = (template: FlowTemplate) => {
+  editingTemplate.value = template;
+  isTemplateDialogVisible.value = true;
 };
 
-const deleteTemplate = async () => {
-  if (templateToDelete.value) {
-    try {
-      await deleteFlowTemplateApi(templateToDelete.value.id);
-      toast.add({ severity: 'success', summary: 'Success', detail: 'Flow template deleted', life: 3000 });
-      selectedTemplate.value = null; // Clear selection
-      templateListRef.value?.refetch(); // This assumes templateListRef has a refetch method exposed
-    } catch (err) {
-      toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete template', life: 5000 });
-    }
+const closeTemplateDialog = () => {
+  isTemplateDialogVisible.value = false;
+  editingTemplate.value = null;
+};
+
+const saveTemplate = async (template: Partial<FlowTemplate>) => {
+  if (template.id) { // Update
+    await updateFlowTemplate({ id: template.id, data: template });
+  } else { // Create
+    await createFlowTemplate(template as any);
   }
-  deleteDialogVisible.value = false;
+  refetchTemplates();
+  closeTemplateDialog();
 };
 
-// --- Edit Logic ---
-const editTemplate = (template: any) => {
-  templateListRef.value?.openEditFlowTemplateForm(template);
+const deleteTemplate = async (id: number) => {
+  if (confirm('Are you sure you want to delete this flow template and all its steps?')) {
+    await deleteFlowTemplate(id);
+    if (selectedTemplateId.value === id) {
+      selectedTemplateId.value = null;
+    }
+    refetchTemplates();
+  }
 };
 
 </script>
+
+<style scoped>
+/* Scoped styles for the flows page */
+</style>
