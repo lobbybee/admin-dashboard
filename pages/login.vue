@@ -70,20 +70,16 @@ async function handleLogin() {
       password: password.value
     })
 
-    const userRole = response.user?.user_type
-    if (userRole === 'manager' || userRole === 'hotel_admin') {
-      router.push('/manager')
-    } else if (userRole === 'receptionist') {
-      router.push('/receptionist')
-    } else {
-      router.push('/') // Fallback
-    }
-  } catch (err) {
+    // Redirect to dashboard after successful login
+    router.push('/')
+  } catch (err: unknown) {
     // Handle APIError specifically
     if (err instanceof APIError && err.data && err.data.detail) {
       error.value = err.data.detail
-    } else {
+    } else if (err instanceof Error) {
       error.value = err.message || 'Invalid username or password'
+    } else {
+      error.value = 'Invalid username or password'
     }
   } finally {
     loading.value = false

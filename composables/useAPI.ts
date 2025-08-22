@@ -82,22 +82,37 @@ export const useAPI = () => {
         };
       }
     },
-    onResponseError({ request, response, error }) {
+    async onResponseError({ request, response, error }) {
       if (response?.status === 401) {
-        return refreshTokens()
-          .then(() => {
-            const newOptions = { ...request };
-            if (authToken.value) {
-                newOptions.headers.set('Authorization', `Bearer ${authToken.value}`);
-            }
-            return ofetch(newOptions);
-          })
-          .catch(() => {
-            clearAuthData();
+        try {
+          // Try to refresh tokens
+          await refreshTokens();
+          
+          // If successful, retry the original request with new token
+          if (authToken.value) {
+            // Create new headers object to avoid mutation issues
+            const headers = new Headers(request.headers as HeadersInit);
+            headers.set('Authorization', `Bearer ${authToken.value}`);
+            
+            const retryOptions = {
+              ...request,
+              headers,
+            };
+            
+            // Extract URL correctly
+            const url = typeof request === 'string' ? request : request.url;
+            return await ofetch(url, retryOptions);
+          }
+        } catch (refreshError) {
+          // If refresh fails, clear auth data and redirect to login
+          clearAuthData();
+          if (process.client) {
             navigateTo('/login');
-            throw new AuthenticationError("Authentication failed, please log in again");
-          });
+          }
+          throw new AuthenticationError("Authentication failed, please log in again");
+        }
       }
+      
       const errorMessage = error?.message || response?._data?.message || "API request failed";
       throw new APIError(
         errorMessage,
@@ -133,7 +148,7 @@ export const useAPI = () => {
                 method: 'POST',
                 body: { refresh: refreshToken.value },
             });
-        } catch (err) {
+        } catch (err: unknown) {
             console.error("Failed to logout from backend. Clearing local tokens anyway.", err);
         }
     }

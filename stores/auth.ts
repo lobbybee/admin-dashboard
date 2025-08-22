@@ -4,7 +4,7 @@ interface User {
   id: number;
   username: string;
   email: string;
-  user_type: 'hotel_admin' | 'manager' | 'receptionist';
+  user_type: 'admin';
   phone_number: string;
   hotel_id: string;
   first_name?: string;
@@ -18,7 +18,7 @@ export const useAuthStore = defineStore('auth', {
   getters: {
     isAuthenticated: (state) => !!state.user,
     hotelId: (state) => state.user?.hotel_id || null,
-    userRole: (state) => state.user?.user_type || null,
+    userRole: (state) => 'admin',
     userInitials: (state) => {
       if (state.user?.first_name && state.user?.last_name) {
         return state.user.first_name.charAt(0) + state.user.last_name.charAt(0);

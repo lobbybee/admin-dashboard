@@ -58,7 +58,7 @@
                     {{ user?.first_name }} {{ user?.last_name }}
                   </p>
                   <p class="text-xs text-surface-500">
-                    {{ userRole === 'manager' || userRole === 'hotel_admin' ? 'Manager' : 'Receptionist' }}
+                    Admin
                   </p>
                 </div>
                 <Icon name="prime:chevron-down" class="hidden h-3 w-3 text-surface-500 xl:block" />
