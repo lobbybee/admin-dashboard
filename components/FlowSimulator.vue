@@ -42,6 +42,19 @@
           <Button v-if="hasNextStepForText()" label="Next" @click="handleNextClick" severity="secondary"/>
         </div>
 
+        <!-- Flow Transition -->
+        <div v-if="availableFlowTransitions.length > 0" class="flex-grow flex items-center space-x-2">
+          <Select 
+            v-model="selectedFlowTransition" 
+            :options="availableFlowTransitions" 
+            optionLabel="label" 
+            optionValue="value" 
+            placeholder="Select a flow to transition to"
+            class="w-full md:w-14rem"
+          />
+          <Button label="Transition" @click="handleFlowTransition" :disabled="!selectedFlowTransition" />
+        </div>
+
         <!-- Flow End -->
         <div v-if="!currentStep && conversationHistory.length > 0" class="text-center flex-grow">
            <p class="text-gray-500 mb-2">Flow ended.</p>
@@ -59,6 +72,8 @@ import type { FlowStepTemplate } from '~/composables/useFlowStepTemplate';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Listbox from 'primevue/listbox';
+import Select from 'primevue/select';
+import { useFetchFlowTemplates } from '~/composables/useFlowTemplate';
 
 const props = defineProps<{
   steps: FlowStepTemplate[];
@@ -76,7 +91,11 @@ const conversationHistory = ref<ConversationMessage[]>([]);
 const currentStep = ref<FlowStepTemplate | null>(null);
 const userInput = ref('');
 const selectedListBoxOption = ref<string | null>(null);
+const selectedFlowTransition = ref<number | null>(null);
 const historyContainer = ref<HTMLElement | null>(null);
+
+// Fetch all flow templates for category matching
+const { flowTemplates } = useFetchFlowTemplates();
 
 const cleanMessageType = (type: string) => type.replace(/[^a-z-]/gi, '').toLowerCase();
 
@@ -97,6 +116,21 @@ const stepsMap = computed(() => {
   return map;
 });
 
+// Available flow transitions based on allowed_flow_categories
+const availableFlowTransitions = computed(() => {
+  if (!currentStep.value || !currentStep.value.allowed_flow_categories || !flowTemplates.value) return [];
+  
+  return flowTemplates.value
+    .filter(template => 
+      currentStep.value.allowed_flow_categories.includes(template.category) &&
+      template.id !== currentStep.value.flow_template // Don't include current flow
+    )
+    .map(template => ({
+      label: template.name,
+      value: template.id
+    }));
+});
+
 const scrollToBottom = () => {
   nextTick(() => {
     if (historyContainer.value) {
@@ -109,6 +143,7 @@ const startSimulation = () => {
   conversationHistory.value = [];
   currentStep.value = null;
   selectedListBoxOption.value = null;
+  selectedFlowTransition.value = null;
   if (props.steps.length > 0) {
     setCurrentStep(props.steps[0]);
   }
@@ -118,6 +153,7 @@ const startSimulation = () => {
 const setCurrentStep = (step: FlowStepTemplate | null) => {
   currentStep.value = step;
   selectedListBoxOption.value = null;
+  selectedFlowTransition.value = null;
   if (step) {
     conversationHistory.value.push({ text: step.message_template, isUser: false, stepId: step.id });
   }
@@ -154,6 +190,7 @@ const handleTextInput = () => {
   conversationHistory.value.push({ text: userInputValue, isUser: true });
   userInput.value = '';
 
+  // Check for conditional branching
   const nextStepId = currentStep.value.conditional_next_steps?.[userInputValue] 
                   || currentStep.value.conditional_next_steps?.['*'];
 
@@ -177,12 +214,39 @@ const hasNextStepForText = () => {
 
 const handleFallback = () => {
     if (!currentStep.value) return;
-    const fallbackStepId = currentStep.value.conditional_next_steps?.['*'] || currentStep.value.next_step_template;
-    if(fallbackStepId){
-        setCurrentStep(stepsMap.value.get(fallbackStepId) || null);
-    } else {
-        currentStep.value = null;
+    
+    // Check for conditional branching with wildcard
+    const conditionalNext = currentStep.value.conditional_next_steps?.['*'];
+    if (conditionalNext) {
+        setCurrentStep(stepsMap.value.get(conditionalNext) || null);
+        return;
     }
+    
+    // Check for linear progression
+    const linearNext = currentStep.value.next_step_template;
+    if (linearNext) {
+        setCurrentStep(stepsMap.value.get(linearNext) || null);
+        return;
+    }
+    
+    // No next step, end flow
+    currentStep.value = null;
+}
+
+const handleFlowTransition = () => {
+  if (!selectedFlowTransition.value || !flowTemplates.value) return;
+  
+  const targetFlow = flowTemplates.value.find(f => f.id === selectedFlowTransition.value);
+  if (targetFlow) {
+    conversationHistory.value.push({ 
+      text: `Transitioning to "${targetFlow.name}" flow...`, 
+      isUser: false 
+    });
+    // In a real implementation, this would load the new flow steps
+    // For simulation, we'll just end the current flow
+    currentStep.value = null;
+  }
+  scrollToBottom();
 }
 
 const editStep = (stepId?: number) => {

@@ -83,6 +83,8 @@ const openNewStepDialog = () => {
     order: maxOrder + 1,
     options: {},
     conditional_next_steps: {},
+    next_step_template: null,
+    allowed_flow_categories: []
   };
   isDialogVisible.value = true;
 };

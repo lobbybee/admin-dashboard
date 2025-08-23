@@ -59,6 +59,35 @@
         </div>
         <Button label="Add Condition" icon="pi pi-plus" @click="addCondition" class="mt-2" />
       </div>
+
+      <!-- Linear Progression -->
+      <div class="field">
+        <h3 class="text-lg font-semibold mb-2">Linear Progression</h3>
+        <p class="text-sm text-gray-500 mb-2">Select the next step for linear progression (used when no conditional branching applies)</p>
+        <Select 
+          v-model="editableStep.next_step_template"
+          :options="stepOptionsWithNone" 
+          optionLabel="label" 
+          optionValue="value" 
+          placeholder="Select Next Step (Optional)"
+          class="w-full"
+        />
+      </div>
+
+      <!-- Flow Transition -->
+      <div class="field">
+        <h3 class="text-lg font-semibold mb-2">Flow Transition</h3>
+        <p class="text-sm text-gray-500 mb-2">Select allowed flow categories for transition to different flows</p>
+        <MultiSelect 
+          v-model="editableStep.allowed_flow_categories"
+          :options="flowCategories"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Select Allowed Flow Categories"
+          class="w-full"
+        />
+        <p class="text-xs text-gray-400 mt-1">Note: Users can transition to these flows by selecting them directly in the simulator</p>
+      </div>
     </form>
     <template #footer>
       <Button label="Cancel" icon="pi pi-times" @click="onClose" severity="secondary" />
@@ -74,7 +103,9 @@ import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
 import Textarea from 'primevue/textarea';
 import Select from 'primevue/select';
+import MultiSelect from 'primevue/multiselect';
 import Button from 'primevue/button';
+import { useFetchFlowTemplates } from '~/composables/useFlowTemplate';
 
 const props = defineProps<{
   step: FlowStepTemplate | null;
@@ -98,10 +129,28 @@ const isQuickReplyOrListPicker = computed(() => {
     return type === 'quick-reply' || type === 'list-picker';
 });
 
+// Fetch flow templates to get categories
+const { flowTemplates } = useFetchFlowTemplates();
+
+const flowCategories = computed(() => {
+  if (!flowTemplates.value) return [];
+  return flowTemplates.value.map(template => ({
+    label: `${template.name} (${template.category})`,
+    value: template.category
+  }));
+});
+
 const stepOptions = computed(() => {
   return props.allSteps
     .filter(s => s.id !== props.step?.id)
     .map(s => ({ label: `${s.step_name} (ID: ${s.id})`, value: s.id }));
+});
+
+const stepOptionsWithNone = computed(() => {
+  return [
+    { label: 'None', value: null },
+    ...stepOptions.value
+  ];
 });
 
 const combinedOptions = computed(() => {
@@ -121,6 +170,7 @@ watch(() => props.step, (newStep) => {
     }
     if (!editableStep.value.options) editableStep.value.options = {};
     if (!editableStep.value.conditional_next_steps) editableStep.value.conditional_next_steps = {};
+    if (!editableStep.value.allowed_flow_categories) editableStep.value.allowed_flow_categories = [];
   } else {
     editableStep.value = null;
   }

@@ -12,6 +12,7 @@ export interface FlowStepTemplate {
   options: Record<string, string> | null;
   conditional_next_steps: Record<string, number> | null;
   next_step_template: number | null;
+  allowed_flow_categories: string[] | null;
 }
 
 export interface FlowStepTemplateCreateData {
@@ -20,7 +21,10 @@ export interface FlowStepTemplateCreateData {
   message_type: string;
   message_template: string;
   order: number;
+  options?: Record<string, string> | null;
   conditional_next_steps?: Record<string, number> | null;
+  next_step_template?: number | null;
+  allowed_flow_categories?: string[] | null;
 }
 
 export interface FlowStepTemplateUpdateData {
@@ -29,7 +33,10 @@ export interface FlowStepTemplateUpdateData {
     message_type?: string;
     message_template?: string;
     order?: number;
+    options?: Record<string, string> | null;
     conditional_next_steps?: Record<string, number> | null;
+    next_step_template?: number | null;
+    allowed_flow_categories?: string[] | null;
 }
 
 // Fetch all flow step templates
