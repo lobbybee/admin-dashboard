@@ -33,15 +33,10 @@
             </Button>
             <div>
               <h1 class="text-lg font-semibold text-surface-900">{{ pageTitle }}</h1>
-              <p class="text-xs text-surface-500">{{ hotel.name }}</p>
             </div>
           </div>
 
           <div class="flex items-center gap-2 sm:gap-4">
-            <div class="hidden items-center gap-2 lg:flex">
-              <div class="h-2 w-2 animate-pulse rounded-full bg-green-500" />
-              <span class="text-sm font-medium text-surface-700">WhatsApp Connected</span>
-            </div>
 
             <Button text rounded aria-label="Notifications">
               <template #icon>
@@ -108,7 +103,9 @@ const sidebarVisible = ref(false);
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: 'prime:home' },
-  { name: 'Hotel Onboarding', href: '/hotel-onboarding', icon: 'prime:building' }
+  { name: 'Hotel Onboarding', href: '/hotel-onboarding', icon: 'prime:building' },
+  { name: 'Staff Management', href: '/staff', icon: 'prime:users' },
+  { name: 'Message Builder', href: '/flows', icon: 'prime:comments' }
 ];
 
 // Fetch hotel data will be triggered automatically by useQuery
@@ -130,16 +127,6 @@ watch(isAuthenticated, (isAuth) => {
 }, { immediate: true });
 
 const userMenuItems = ref([
-  {
-    label: 'Profile',
-    icon: 'prime:user',
-    route: '/hotel-profile' // Corrected route
-  },
-  {
-    label: 'Settings',
-    icon: 'prime:cog',
-    route: '/settings'
-  },
   {
     separator: true
   },
@@ -166,7 +153,9 @@ const handleLogout = async () => {
 const pageTitle = computed(() => {
   const titleMap = {
     '/': 'Dashboard',
-    '/hotel-onboarding': 'Hotel Onboarding'
+    '/hotel-onboarding': 'Hotel Onboarding',
+    '/staff': 'Staff Management',
+    '/flows': 'Message Builder'
   };
   return titleMap[route.path] || 'Dashboard';
 });

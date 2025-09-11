@@ -24,7 +24,7 @@
     "@vue-flow/core": "^1.46.0",
     "@vueuse/core": "^13.6.0",
     "add": "^2.0.6",
-    "nuxt": "^3.18.1",
+    "nuxt": "^4.0.3",
     "pinia": "^3.0.3",
     "primeicons": "^7.0.0",
     "primevue": "^4.3.7",

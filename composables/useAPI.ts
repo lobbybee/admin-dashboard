@@ -50,7 +50,7 @@ export const useAPI = () => {
     }
 
     refreshState.value.isRefreshing = true;
-    refreshState.value.refreshPromise = ofetch('/user/login/refresh/', {
+    refreshState.value.refreshPromise = ofetch('/login/refresh/', {
       baseURL: apiURL,
       method: 'POST',
       body: { refresh: refreshToken.value },
@@ -87,18 +87,18 @@ export const useAPI = () => {
         try {
           // Try to refresh tokens
           await refreshTokens();
-          
+
           // If successful, retry the original request with new token
           if (authToken.value) {
             // Create new headers object to avoid mutation issues
             const headers = new Headers(request.headers as HeadersInit);
             headers.set('Authorization', `Bearer ${authToken.value}`);
-            
+
             const retryOptions = {
               ...request,
               headers,
             };
-            
+
             // Extract URL correctly
             const url = typeof request === 'string' ? request : request.url;
             return await ofetch(url, retryOptions);
@@ -112,7 +112,7 @@ export const useAPI = () => {
           throw new AuthenticationError("Authentication failed, please log in again");
         }
       }
-      
+
       const errorMessage = error?.message || response?._data?.message || "API request failed";
       throw new APIError(
         errorMessage,
@@ -124,7 +124,7 @@ export const useAPI = () => {
 
   const login = async (credentials: { username?: string; password?: string }) => {
     try {
-      const response = await API('/user/login/', {
+      const response = await API('/login/', {
         method: 'POST',
         body: credentials,
       });
@@ -144,7 +144,7 @@ export const useAPI = () => {
   const logout = async () => {
     if (refreshToken.value) {
         try {
-            await API('/user/logout/', {
+            await API('/logout/', {
                 method: 'POST',
                 body: { refresh: refreshToken.value },
             });
