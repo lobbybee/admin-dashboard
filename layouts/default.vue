@@ -105,7 +105,8 @@ const navigation = [
   { name: 'Dashboard', href: '/', icon: 'prime:home' },
   { name: 'Hotel Onboarding', href: '/hotel-onboarding', icon: 'prime:building' },
   { name: 'Staff Management', href: '/staff', icon: 'prime:users' },
-  { name: 'Message Builder', href: '/flows', icon: 'prime:comments' }
+  { name: 'Message Builder', href: '/flows', icon: 'prime:comments' },
+  { name: 'Payments', href: '/payments', icon: 'prime:credit-card' }
 ];
 
 // Fetch hotel data will be triggered automatically by useQuery
