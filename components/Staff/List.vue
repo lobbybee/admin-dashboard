@@ -12,7 +12,7 @@
     <template #header>
       <div class="flex flex-wrap items-center justify-between gap-2">
         <h2 class="text-2xl font-bold">Staff Management</h2>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-wrap">
           <InputText
             :model-value="search"
             @update:model-value="$emit('update:search', $event)"

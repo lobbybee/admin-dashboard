@@ -1,5 +1,5 @@
 <template>
-  <Dialog :visible="visible" @update:visible="$emit('update:visible', $event)" :header="`${isEdit ? 'Edit' : 'Add'} Staff User`" modal style="width: 50vw; max-width: 600px;">
+  <Dialog :visible="visible" @update:visible="$emit('update:visible', $event)" :header="`${isEdit ? 'Edit' : 'Add'} Staff User`" modal >
     <div class="p-4">
       <div class="flex flex-col gap-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -14,7 +14,7 @@
             />
             <small v-if="errors.username" class="p-error">{{ errors.username }}</small>
           </div>
-          
+
           <div>
             <label for="email" class="block mb-2">Email *</label>
             <InputText
@@ -27,7 +27,7 @@
             <small v-if="errors.email" class="p-error">{{ errors.email }}</small>
           </div>
         </div>
-        
+
         <div v-if="!isEdit" class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label for="password" class="block mb-2">Password *</label>
@@ -41,7 +41,7 @@
             />
             <small v-if="errors.password" class="p-error">{{ errors.password }}</small>
           </div>
-          
+
           <div>
             <label for="confirmPassword" class="block mb-2">Confirm Password *</label>
             <Password
@@ -55,7 +55,7 @@
             <small v-if="errors.confirmPassword" class="p-error">{{ errors.confirmPassword }}</small>
           </div>
         </div>
-        
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label for="userType" class="block mb-2">User Type *</label>
@@ -70,7 +70,7 @@
             />
             <small v-if="errors.user_type" class="p-error">{{ errors.user_type }}</small>
           </div>
-          
+
           <div>
             <label for="phone" class="block mb-2">Phone Number</label>
             <InputText
@@ -84,7 +84,7 @@
         </div>
       </div>
     </div>
-    
+
     <template #footer>
       <Button label="Cancel" icon="pi pi-times" @click="$emit('update:visible', false)" class="p-button-text" />
       <Button :label="isEdit ? 'Update' : 'Create'" icon="pi pi-check" @click="handleSubmit" :loading="loading" />
@@ -156,39 +156,39 @@ watch(() => props.user, (newUser) => {
 
 const validateForm = () => {
   errors.value = {};
-  
+
   if (!formData.value.username.trim()) {
     errors.value.username = 'Username is required';
   }
-  
+
   if (!formData.value.email.trim()) {
     errors.value.email = 'Email is required';
   } else if (!/^\S+@\S+\.\S+$/.test(formData.value.email)) {
     errors.value.email = 'Invalid email format';
   }
-  
+
   if (!isEdit.value) {
     if (!formData.value.password) {
       errors.value.password = 'Password is required';
     } else if (formData.value.password.length < 8) {
       errors.value.password = 'Password must be at least 8 characters';
     }
-    
+
     if (formData.value.password !== formData.value.confirmPassword) {
       errors.value.confirmPassword = 'Passwords do not match';
     }
   }
-  
+
   if (!formData.value.user_type) {
     errors.value.user_type = 'User type is required';
   }
-  
+
   return Object.keys(errors.value).length === 0;
 };
 
 const handleSubmit = () => {
   if (!validateForm()) return;
-  
+
   if (isEdit.value && props.user) {
     // For edit, we don't send password unless it's being changed
     const updateData: StaffUserUpdateRequest = {
@@ -197,12 +197,12 @@ const handleSubmit = () => {
       user_type: formData.value.user_type,
       phone_number: formData.value.phone_number || undefined
     };
-    
+
     // Only include password if it's being changed
     if (formData.value.password) {
       updateData.password = formData.value.password;
     }
-    
+
     emit('save', updateData, true, props.user.id.toString());
   } else {
     const createData: StaffUserCreateRequest = {
@@ -212,7 +212,7 @@ const handleSubmit = () => {
       user_type: formData.value.user_type,
       phone_number: formData.value.phone_number || undefined
     };
-    
+
     emit('save', createData, false);
   }
 };

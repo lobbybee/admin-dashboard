@@ -2,7 +2,7 @@
   <div class="flex h-screen">
     <div class="w-1/4 bg-gray-100 p-4 overflow-y-auto border-r">
       <h2 class="text-lg font-semibold mb-4">Flow Templates</h2>
-      <FlowTemplateList 
+      <FlowTemplateList
         @template-selected="onTemplateSelected"
         @create="openNewTemplateDialog"
         @edit="openEditTemplateDialog"
@@ -19,6 +19,7 @@
       :template="editingTemplate"
       @close="closeTemplateDialog"
       @save="saveTemplate"
+      class="min-w-[350px] w-full"
     />
   </div>
 </template>

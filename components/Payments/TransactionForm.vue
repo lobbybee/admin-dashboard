@@ -1,5 +1,5 @@
 <template>
-  <Dialog :visible="visible" @update:visible="$emit('update:visible', $event)" :header="`${isEdit ? 'Edit' : 'Add'} Transaction`" modal style="width: 50vw; max-width: 600px;">
+  <Dialog :visible="visible" @update:visible="$emit('update:visible', $event)" :header="`${isEdit ? 'Edit' : 'Add'} Transaction`" modal >
     <div class="p-4">
       <div class="flex flex-col gap-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -31,7 +31,7 @@
             </div>
             <small v-if="errors.hotel" class="p-error">{{ errors.hotel }}</small>
           </div>
-          
+
           <div>
             <label for="plan" class="block mb-2">Plan *</label>
             <Select
@@ -57,7 +57,7 @@
             <small v-if="errors.plan" class="p-error">{{ errors.plan }}</small>
           </div>
         </div>
-        
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label for="amount" class="block mb-2">Amount *</label>
@@ -72,7 +72,7 @@
             />
             <small v-if="errors.amount" class="p-error">{{ errors.amount }}</small>
           </div>
-          
+
           <div>
             <label for="transactionType" class="block mb-2">Transaction Type *</label>
             <Select
@@ -87,7 +87,7 @@
             <small v-if="errors.transaction_type" class="p-error">{{ errors.transaction_type }}</small>
           </div>
         </div>
-        
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label for="status" class="block mb-2">Status *</label>
@@ -102,7 +102,7 @@
             />
             <small v-if="errors.status" class="p-error">{{ errors.status }}</small>
           </div>
-          
+
           <div>
             <label for="transactionId" class="block mb-2">Transaction ID</label>
             <InputText
@@ -112,7 +112,7 @@
             />
           </div>
         </div>
-        
+
         <div>
           <label for="notes" class="block mb-2">Notes</label>
           <Textarea
@@ -124,7 +124,7 @@
         </div>
       </div>
     </div>
-    
+
     <template #footer>
       <Button label="Cancel" icon="pi pi-times" @click="$emit('update:visible', false)" class="p-button-text" />
       <Button :label="isEdit ? 'Update' : 'Create'" icon="pi pi-check" @click="handleSubmit" :loading="loading" />
@@ -227,13 +227,13 @@ watch(() => props.transaction, (newTransaction) => {
       transaction_id: newTransaction.transaction_id,
       notes: newTransaction.notes
     };
-    
+
     // Set selected names for display
     if (filteredHotels.value) {
       const hotel = filteredHotels.value.find(h => h.id === newTransaction.hotel);
       if (hotel) selectedHotelName.value = hotel.name;
     }
-    
+
     if (plansData.value) {
       const plan = plansData.value.results.find(p => p.id === newTransaction.plan);
       if (plan) selectedPlanName.value = plan.name;
@@ -256,33 +256,33 @@ watch(() => props.transaction, (newTransaction) => {
 
 const validateForm = () => {
   errors.value = {};
-  
+
   if (!formData.value.hotel) {
     errors.value.hotel = 'Hotel is required';
   }
-  
+
   if (!formData.value.plan) {
     errors.value.plan = 'Plan is required';
   }
-  
+
   if (formData.value.amount <= 0) {
     errors.value.amount = 'Amount must be greater than 0';
   }
-  
+
   if (!formData.value.transaction_type) {
     errors.value.transaction_type = 'Transaction type is required';
   }
-  
+
   if (!formData.value.status) {
     errors.value.status = 'Status is required';
   }
-  
+
   return Object.keys(errors.value).length === 0;
 };
 
 const handleSubmit = () => {
   if (!validateForm()) return;
-  
+
   if (isEdit.value && props.transaction) {
     const updateData: TransactionUpdateRequest = {
       hotel: formData.value.hotel,
@@ -293,7 +293,7 @@ const handleSubmit = () => {
       transaction_id: formData.value.transaction_id,
       notes: formData.value.notes
     };
-    
+
     emit('save', updateData, true, props.transaction.id);
   } else {
     const createData: TransactionCreateRequest = {
@@ -305,7 +305,7 @@ const handleSubmit = () => {
       transaction_id: formData.value.transaction_id,
       notes: formData.value.notes
     };
-    
+
     emit('save', createData, false);
   }
 };

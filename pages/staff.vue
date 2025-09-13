@@ -13,15 +13,16 @@
       @update:search="updateSearch"
       @search="fetchStaffUsers"
     />
-    
+
     <StaffForm
       :visible="formVisible"
       :user="selectedUser"
       :loading="isCreating || isUpdating"
       @update:visible="formVisible = $event"
       @save="handleSave"
+      class="w-full max-w-xl"
     />
-    
+
     <ConfirmDialog />
   </div>
 </template>
@@ -33,11 +34,11 @@ import { useConfirm } from 'primevue/useconfirm';
 import StaffList from '~/components/Staff/List.vue';
 import StaffForm from '~/components/Staff/Form.vue';
 import ConfirmDialog from 'primevue/confirmdialog';
-import { 
-  useFetchStaffUsers, 
-  useCreateStaffUser, 
-  useUpdateStaffUser, 
-  useDeleteStaffUser 
+import {
+  useFetchStaffUsers,
+  useCreateStaffUser,
+  useUpdateStaffUser,
+  useDeleteStaffUser
 } from '~/composables/useStaff';
 import type { StaffUser, StaffUserCreateRequest, StaffUserUpdateRequest } from '~/types/staff';
 
@@ -127,7 +128,7 @@ const handleSave = async (
         life: 3000
       });
     }
-    
+
     formVisible.value = false;
     fetchStaffUsers();
   } catch (error: any) {

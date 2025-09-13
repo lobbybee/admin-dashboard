@@ -20,11 +20,13 @@
       v-model:visible="isDetailsDialogVisible"
       :hotel="selectedHotel"
       @hotel-updated="refetch"
+      class="w-full min-w-[350px] max-w-xl"
     />
 
     <CreateDialog
       v-model:visible="isCreateDialogVisible"
       @hotel-created="onHotelCreated"
+      class="w-full min-w-[350px] max-w-xl"
     />
   </div>
 </template>
@@ -75,7 +77,7 @@ const onViewDetails = (hotel: Hotel) => {
 };
 
 const onSearch = () => {
-  updateRoute({ 
+  updateRoute({
     search: searchFilter.value || undefined,
     status: statusFilter.value || undefined,
     page: undefined // Reset to first page
@@ -93,7 +95,7 @@ const onHotelCreated = () => {
 
 // Watch local filters and update route (which will trigger refetch automatically)
 watch([searchFilter, statusFilter], ([newSearch, newStatus]) => {
-  updateRoute({ 
+  updateRoute({
     search: newSearch || undefined,
     status: newStatus || undefined,
     page: undefined // Reset to first page

@@ -1,5 +1,5 @@
 <template>
-  <Dialog :visible="visible" @update:visible="$emit('update:visible', $event)" :header="`${isEdit ? 'Edit' : 'Add'} Subscription Plan`" modal style="width: 50vw; max-width: 600px;">
+  <Dialog :visible="visible" @update:visible="$emit('update:visible', $event)" :header="`${isEdit ? 'Edit' : 'Add'} Subscription Plan`" modal >
     <div class="p-4">
       <div class="flex flex-col gap-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -13,7 +13,7 @@
             />
             <small v-if="errors.name" class="p-error">{{ errors.name }}</small>
           </div>
-          
+
           <div>
             <label for="planType" class="block mb-2">Plan Type *</label>
             <Select
@@ -28,7 +28,7 @@
             <small v-if="errors.plan_type" class="p-error">{{ errors.plan_type }}</small>
           </div>
         </div>
-        
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label for="price" class="block mb-2">Price *</label>
@@ -43,7 +43,7 @@
             />
             <small v-if="errors.price" class="p-error">{{ errors.price }}</small>
           </div>
-          
+
           <div>
             <label for="duration" class="block mb-2">Duration (Days) *</label>
             <InputNumber
@@ -55,7 +55,7 @@
             <small v-if="errors.duration_days" class="p-error">{{ errors.duration_days }}</small>
           </div>
         </div>
-        
+
         <div>
           <label for="description" class="block mb-2">Description</label>
           <Textarea
@@ -65,7 +65,7 @@
             class="w-full"
           />
         </div>
-        
+
         <div>
           <div class="flex items-center">
             <Checkbox
@@ -79,7 +79,7 @@
         </div>
       </div>
     </div>
-    
+
     <template #footer>
       <Button label="Cancel" icon="pi pi-times" @click="$emit('update:visible', false)" class="p-button-text" />
       <Button :label="isEdit ? 'Update' : 'Create'" icon="pi pi-check" @click="handleSubmit" :loading="loading" />
@@ -153,25 +153,25 @@ watch(() => props.plan, (newPlan) => {
 
 const validateForm = () => {
   errors.value = {};
-  
+
   if (!formData.value.name.trim()) {
     errors.value.name = 'Plan name is required';
   }
-  
+
   if (formData.value.price < 0) {
     errors.value.price = 'Price must be greater than or equal to 0';
   }
-  
+
   if (formData.value.duration_days <= 0) {
     errors.value.duration_days = 'Duration must be greater than 0';
   }
-  
+
   return Object.keys(errors.value).length === 0;
 };
 
 const handleSubmit = () => {
   if (!validateForm()) return;
-  
+
   if (isEdit.value && props.plan) {
     const updateData: SubscriptionPlanUpdateRequest = {
       name: formData.value.name,
@@ -181,7 +181,7 @@ const handleSubmit = () => {
       description: formData.value.description,
       is_active: formData.value.is_active
     };
-    
+
     emit('save', updateData, true, props.plan.id);
   } else {
     const createData: SubscriptionPlanCreateRequest = {
@@ -192,7 +192,7 @@ const handleSubmit = () => {
       description: formData.value.description,
       is_active: formData.value.is_active
     };
-    
+
     emit('save', createData, false);
   }
 };

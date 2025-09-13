@@ -33,7 +33,7 @@
                 </Column>
                 <Column header="Link">
                     <template #body="{data}">
-                        <a :href="data.document_file" target="_blank" rel="noopener noreferrer" class="text-primary-500 hover:underline">
+                        <a :href="data.document_file_url" target="_blank" rel="noopener noreferrer" class="text-primary-500 hover:underline">
                             View Document <i class="pi pi-external-link ml-1"></i>
                         </a>
                     </template>

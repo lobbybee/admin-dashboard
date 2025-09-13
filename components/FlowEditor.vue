@@ -11,22 +11,23 @@
 
       <div v-if="isLoading">Loading flow steps...</div>
       <div v-if="error">Error fetching flow steps.</div>
-      
+
       <!-- Simulator View -->
-      <FlowSimulator 
+      <FlowSimulator
         v-if="sortedFlowStepTemplates"
-        :steps="sortedFlowStepTemplates" 
+        :steps="sortedFlowStepTemplates"
         @edit-step="openEditDialogById"
         @delete-step="deleteStep"
       />
 
     </div>
-    <FlowStepDialog 
-      v-if="isDialogVisible" 
-      :step="selectedStep" 
+    <FlowStepDialog
+      v-if="isDialogVisible"
+      :step="selectedStep"
       :all-steps="sortedFlowStepTemplates"
       @close="closeDialog"
       @save="saveStep"
+      class="min-w-[350px] w-full"
     />
   </div>
 </template>

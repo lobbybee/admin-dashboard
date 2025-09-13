@@ -1,5 +1,5 @@
 <template>
-  <Dialog :visible="visible" @update:visible="$emit('update:visible', $event)" :header="`${isEdit ? 'Edit' : 'Add'} Hotel Subscription`" modal style="width: 50vw; max-width: 600px;">
+  <Dialog :visible="visible" @update:visible="$emit('update:visible', $event)" :header="`${isEdit ? 'Edit' : 'Add'} Hotel Subscription`" modal >
     <div class="p-4">
       <div class="flex flex-col gap-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -31,7 +31,7 @@
             </div>
             <small v-if="errors.hotel" class="p-error">{{ errors.hotel }}</small>
           </div>
-          
+
           <div>
             <label for="plan" class="block mb-2">Plan *</label>
             <Select
@@ -57,7 +57,7 @@
             <small v-if="errors.plan" class="p-error">{{ errors.plan }}</small>
           </div>
         </div>
-        
+
         <div v-if="!isEdit" class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label for="startDate" class="block mb-2">Start Date *</label>
@@ -71,7 +71,7 @@
             />
             <small v-if="errors.start_date" class="p-error">{{ errors.start_date }}</small>
           </div>
-          
+
           <div>
             <label for="endDate" class="block mb-2">End Date *</label>
             <Calendar
@@ -85,19 +85,19 @@
             <small v-if="errors.end_date" class="p-error">{{ errors.end_date }}</small>
           </div>
         </div>
-        
+
         <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label for="startDate" class="block mb-2">Start Date</label>
             <span>{{ formatDate(formData.start_date) }}</span>
           </div>
-          
+
           <div>
             <label for="endDate" class="block mb-2">End Date</label>
             <span>{{ formatDate(formData.end_date) }}</span>
           </div>
         </div>
-        
+
         <div>
           <div class="flex items-center">
             <Checkbox
@@ -111,7 +111,7 @@
         </div>
       </div>
     </div>
-    
+
     <template #footer>
       <Button label="Cancel" icon="pi pi-times" @click="$emit('update:visible', false)" class="p-button-text" />
       <Button :label="isEdit ? 'Update' : 'Create'" icon="pi pi-check" @click="handleSubmit" :loading="loading" />
@@ -199,13 +199,13 @@ watch(() => props.subscription, (newSubscription) => {
       end_date: new Date(newSubscription.end_date),
       is_active: newSubscription.is_active
     };
-    
+
     // Set selected names for display
     if (filteredHotels.value) {
       const hotel = filteredHotels.value.find(h => h.id === newSubscription.hotel);
       if (hotel) selectedHotelName.value = hotel.name;
     }
-    
+
     if (plansData.value) {
       const plan = plansData.value.results.find(p => p.id === newSubscription.plan);
       if (plan) selectedPlanName.value = plan.name;
@@ -226,35 +226,35 @@ watch(() => props.subscription, (newSubscription) => {
 
 const validateForm = () => {
   errors.value = {};
-  
+
   if (!formData.value.hotel) {
     errors.value.hotel = 'Hotel is required';
   }
-  
+
   if (!formData.value.plan) {
     errors.value.plan = 'Plan is required';
   }
-  
+
   return Object.keys(errors.value).length === 0;
 };
 
 const handleSubmit = () => {
   if (!validateForm()) return;
-  
+
   if (isEdit.value && props.subscription) {
     const updateData: HotelSubscriptionUpdateRequest = {
       hotel: formData.value.hotel,
       plan: formData.value.plan,
       is_active: formData.value.is_active
     };
-    
+
     emit('save', updateData, true, props.subscription.id);
   } else {
     const createData: HotelSubscriptionCreateRequest = {
       hotel: formData.value.hotel,
       plan: formData.value.plan
     };
-    
+
     emit('save', createData, false);
   }
 };
