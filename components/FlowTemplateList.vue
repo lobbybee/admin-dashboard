@@ -1,10 +1,10 @@
 <template>
   <div>
     <div class="mb-4">
-      <Button label="New Template" icon="pi pi-plus" @click="$emit('create')" class="w-full" />
+      <Button label="New Template" icon="pi pi-plus" @click="openNewTemplateDialog" class="w-full" />
     </div>
-    <div v-if="isLoading">Loading...</div>
-    <div v-if="error">Error fetching flow templates</div>
+    <div v-if="isLoadingTemplates">Loading...</div>
+    <div v-if="templatesError">Error fetching flow templates</div>
     <ul v-if="flowTemplates" class="space-y-2">
       <li
         v-for="template in flowTemplates"
@@ -18,9 +18,9 @@
           <span :class="[template.is_active ? 'bg-green-500' : 'bg-gray-400', 'w-2.5 h-2.5 rounded-full ml-2']"></span>
         </div>
         <div class="space-x-2 opacity-50 group-hover:opacity-100">
-          <InputSwitch :modelValue="template.is_active" @update:modelValue="(value) => $emit('toggle-active', { ...template, is_active: value })" @click.stop/>
-          <Button icon="pi pi-pencil" severity="secondary" text rounded @click.stop="$emit('edit', template)"/>
-          <Button icon="pi pi-trash" severity="danger" text rounded @click.stop="$emit('delete', template.id)"/>
+          <InputSwitch :modelValue="template.is_active" @update:modelValue="(value) => handleToggle(template, value)" @click.stop/>
+          <Button icon="pi pi-pencil" severity="secondary" text rounded @click.stop="openEditTemplateDialog(template)"/>
+          <Button icon="pi pi-trash" severity="danger" text rounded @click.stop="deleteTemplate(template.id)"/>
         </div>
       </li>
     </ul>
@@ -28,20 +28,33 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useFetchFlowTemplates, type FlowTemplate } from '~/composables/useFlowTemplate';
+import { storeToRefs } from 'pinia';
+import { useFlowStore } from '~/stores/flow';
 import Button from 'primevue/button';
 import InputSwitch from 'primevue/inputswitch';
+import type { FlowTemplate } from '~/composables/useFlowTemplate';
 
-const emit = defineEmits(['template-selected', 'create', 'edit', 'delete', 'toggle-active']);
+const flowStore = useFlowStore();
 
-const { flowTemplates, isLoading, error } = useFetchFlowTemplates();
+const {
+  flowTemplates,
+  isLoadingTemplates,
+  templatesError,
+  selectedTemplateId,
+} = storeToRefs(flowStore);
 
-const selectedTemplateId = ref<number | null>(null);
+const {
+  selectTemplate,
+  openNewTemplateDialog,
+  openEditTemplateDialog,
+  deleteTemplate,
+  saveTemplate,
+} = flowStore;
 
-const selectTemplate = (id: number) => {
-  selectedTemplateId.value = id;
-  emit('template-selected', id);
-};
-
+const handleToggle = async (template: FlowTemplate, value: boolean) => {
+  // Temporarily set the template to be edited and save it.
+  // The store's saveTemplate action will handle the update and cleanup.
+  flowStore.editingTemplate = { ...template, is_active: value };
+  await saveTemplate();
+}
 </script>

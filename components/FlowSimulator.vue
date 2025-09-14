@@ -4,15 +4,15 @@
     <div ref="historyContainer" class="flex-grow overflow-y-auto mb-4 p-4 space-y-4">
       <div v-for="(msg, index) in conversationHistory" :key="index" class="flex"
            :class="msg.isUser ? 'justify-end' : 'justify-start'">
-        <div 
+        <div
           class="rounded-lg px-4 py-2 max-w-xs lg:max-w-md relative group"
           :class="msg.isUser ? 'bg-blue-500 text-white' : 'bg-white text-gray-800 shadow-sm cursor-pointer'"
           @dblclick="editStep(msg.stepId)"
         >
           <p>{{ msg.text }}</p>
-          <button 
-            v-if="!msg.isUser" 
-            @click.stop="deleteStep(msg.stepId)" 
+          <button
+            v-if="!msg.isUser"
+            @click.stop="deleteStep(msg.stepId)"
             class="absolute top-0 right-0 mt-1 mr-1 text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity"
           >
              <i class="pi pi-trash"></i>
@@ -44,11 +44,11 @@
 
         <!-- Flow Transition -->
         <div v-if="availableFlowTransitions.length > 0" class="flex-grow flex items-center space-x-2">
-          <Select 
-            v-model="selectedFlowTransition" 
-            :options="availableFlowTransitions" 
-            optionLabel="label" 
-            optionValue="value" 
+          <Select
+            v-model="selectedFlowTransition"
+            :options="availableFlowTransitions"
+            optionLabel="label"
+            optionValue="value"
             placeholder="Select a flow to transition to"
             class="w-full md:w-14rem"
           />
@@ -68,18 +68,17 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted, nextTick, computed } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useFlowStore } from '~/stores/flow';
 import type { FlowStepTemplate } from '~/composables/useFlowStepTemplate';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Listbox from 'primevue/listbox';
 import Select from 'primevue/select';
-import { useFetchFlowTemplates } from '~/composables/useFlowTemplate';
 
-const props = defineProps<{
-  steps: FlowStepTemplate[];
-}>();
-
-const emit = defineEmits(['edit-step', 'delete-step']);
+const flowStore = useFlowStore();
+const { sortedFlowStepTemplates, flowTemplates, selectedTemplateId } = storeToRefs(flowStore);
+const { openEditStepDialog, deleteStep: deleteStepAction } = flowStore;
 
 interface ConversationMessage {
   text: string;
@@ -94,9 +93,6 @@ const selectedListBoxOption = ref<string | null>(null);
 const selectedFlowTransition = ref<number | null>(null);
 const historyContainer = ref<HTMLElement | null>(null);
 
-// Fetch all flow templates for category matching
-const { flowTemplates } = useFetchFlowTemplates();
-
 const cleanMessageType = (type: string) => type.replace(/[^a-z-]/gi, '').toLowerCase();
 
 const isQuickReply = computed(() => currentStep.value && cleanMessageType(currentStep.value.message_type) === 'quick-reply');
@@ -110,18 +106,18 @@ const listBoxOptions = computed(() => {
 
 const stepsMap = computed(() => {
   const map = new Map<number, FlowStepTemplate>();
-  for (const step of props.steps) {
+  if (!sortedFlowStepTemplates.value) return map;
+  for (const step of sortedFlowStepTemplates.value) {
     map.set(step.id, step);
   }
   return map;
 });
 
-// Available flow transitions based on allowed_flow_categories
 const availableFlowTransitions = computed(() => {
   if (!currentStep.value || !currentStep.value.allowed_flow_categories || !flowTemplates.value) return [];
-  
+
   return flowTemplates.value
-    .filter(template => 
+    .filter(template =>
       currentStep.value.allowed_flow_categories.includes(template.category) &&
       template.id !== currentStep.value.flow_template // Don't include current flow
     )
@@ -144,8 +140,8 @@ const startSimulation = () => {
   currentStep.value = null;
   selectedListBoxOption.value = null;
   selectedFlowTransition.value = null;
-  if (props.steps.length > 0) {
-    setCurrentStep(props.steps[0]);
+  if (sortedFlowStepTemplates.value && sortedFlowStepTemplates.value.length > 0) {
+    setCurrentStep(sortedFlowStepTemplates.value[0]);
   }
   scrollToBottom();
 };
@@ -190,8 +186,7 @@ const handleTextInput = () => {
   conversationHistory.value.push({ text: userInputValue, isUser: true });
   userInput.value = '';
 
-  // Check for conditional branching
-  const nextStepId = currentStep.value.conditional_next_steps?.[userInputValue] 
+  const nextStepId = currentStep.value.conditional_next_steps?.[userInputValue]
                   || currentStep.value.conditional_next_steps?.['*'];
 
   if (nextStepId) {
@@ -214,55 +209,49 @@ const hasNextStepForText = () => {
 
 const handleFallback = () => {
     if (!currentStep.value) return;
-    
-    // Check for conditional branching with wildcard
+
     const conditionalNext = currentStep.value.conditional_next_steps?.['*'];
     if (conditionalNext) {
         setCurrentStep(stepsMap.value.get(conditionalNext) || null);
         return;
     }
-    
-    // Check for linear progression
+
     const linearNext = currentStep.value.next_step_template;
     if (linearNext) {
         setCurrentStep(stepsMap.value.get(linearNext) || null);
         return;
     }
-    
-    // No next step, end flow
+
     currentStep.value = null;
 }
 
 const handleFlowTransition = () => {
   if (!selectedFlowTransition.value || !flowTemplates.value) return;
-  
+
   const targetFlow = flowTemplates.value.find(f => f.id === selectedFlowTransition.value);
   if (targetFlow) {
-    conversationHistory.value.push({ 
-      text: `Transitioning to "${targetFlow.name}" flow...`, 
-      isUser: false 
+    conversationHistory.value.push({
+      text: `Transitioning to "${targetFlow.name}" flow...`,
+      isUser: false
     });
-    // In a real implementation, this would load the new flow steps
-    // For simulation, we'll just end the current flow
-    currentStep.value = null;
+    // Here we should select the new template in the store
+    flowStore.selectTemplate(selectedFlowTransition.value);
   }
   scrollToBottom();
 }
 
 const editStep = (stepId?: number) => {
   if (stepId) {
-    emit('edit-step', stepId);
+    openEditStepDialog(stepId);
   }
 };
 
 const deleteStep = (stepId?: number) => {
   if (stepId) {
-    emit('delete-step', stepId);
+    deleteStepAction(stepId);
   }
 };
 
-watch(() => props.steps, startSimulation, { immediate: true, deep: true });
-
-onMounted(startSimulation);
+watch(sortedFlowStepTemplates, startSimulation, { immediate: true });
 
 </script>

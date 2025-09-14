@@ -5,7 +5,7 @@
          :class="isUserResponse ? 'bg-blue-100 self-end' : 'bg-gray-100 self-start'">
       <p class="text-sm">{{ step.message_template }}</p>
       <div v-if="step.message_type === 'quick_reply' || step.message_type === 'list_message'" class="mt-2">
-        <span v-for="(option, key) in step.options" :key="key" 
+        <span v-for="(option, key) in step.options" :key="key"
               class="inline-block bg-blue-500 text-white text-xs font-bold mr-2 px-2.5 py-1 rounded-full">
           {{ option }}
         </span>

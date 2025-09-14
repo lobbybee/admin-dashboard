@@ -1,5 +1,5 @@
 <template>
-  <Dialog :visible="true" modal header="Edit Flow Step" :style="{ width: '50vw' }" @update:visible="onClose">
+  <Dialog :visible="isStepDialogVisible" modal header="Edit Flow Step" :style="{ width: '50vw' }" @update:visible="closeStepDialog">
     <form @submit.prevent="onSave" v-if="editableStep" class="p-fluid">
       <!-- Core Fields -->
       <div class="field">
@@ -12,9 +12,9 @@
       </div>
       <div class="field">
         <label for="message_type">Message Type</label>
-        <Select 
-          id="message_type" 
-          v-model="editableStep.message_type" 
+        <Select
+          id="message_type"
+          v-model="editableStep.message_type"
           :options="messageTypeOptions"
           optionLabel="label"
           optionValue="value"
@@ -27,12 +27,12 @@
         <div v-for="(option, index) in combinedOptions" :key="index" class="grid grid-cols-12 gap-2 mb-2 items-center">
           <InputText :modelValue="option.key" placeholder="Key" class="col-span-2" disabled/>
           <InputText :modelValue="option.text" @update:modelValue="updateOptionText(option.key, $event)" placeholder="Display Text (e.g., Yes)" class="col-span-5" />
-          <Select 
+          <Select
             :modelValue="option.nextStepId"
             @update:modelValue="updateOptionNextStep(option.key, $event)"
-            :options="stepOptions" 
-            optionLabel="label" 
-            optionValue="value" 
+            :options="stepOptions"
+            optionLabel="label"
+            optionValue="value"
             placeholder="Select Next Step"
             class="col-span-4"
           />
@@ -46,14 +46,14 @@
         <h3 class="text-lg font-semibold mb-2">Conditional Branching</h3>
         <div v-for="(stepId, condition) in editableStep.conditional_next_steps" :key="condition" class="flex items-center space-x-2 mb-2">
           <InputText :value="condition" @input="updateConditionKey($event, condition)" placeholder="User Input (e.g., * for any)" class="w-1/4" />
-          <Select 
+          <Select
             :modelValue="stepId"
             @update:modelValue="editableStep.conditional_next_steps[condition] = $event"
-            :options="stepOptions" 
-            optionLabel="label" 
-            optionValue="value" 
+            :options="stepOptions"
+            optionLabel="label"
+            optionValue="value"
             placeholder="Select Next Step"
-            class="w-1/2" 
+            class="w-1/2"
           />
           <Button icon="pi pi-trash" severity="danger" @click="removeCondition(condition)" />
         </div>
@@ -64,11 +64,11 @@
       <div class="field">
         <h3 class="text-lg font-semibold mb-2">Linear Progression</h3>
         <p class="text-sm text-gray-500 mb-2">Select the next step for linear progression (used when no conditional branching applies)</p>
-        <Select 
+        <Select
           v-model="editableStep.next_step_template"
-          :options="stepOptionsWithNone" 
-          optionLabel="label" 
-          optionValue="value" 
+          :options="stepOptionsWithNone"
+          optionLabel="label"
+          optionValue="value"
           placeholder="Select Next Step (Optional)"
           class="w-full"
         />
@@ -78,7 +78,7 @@
       <div class="field">
         <h3 class="text-lg font-semibold mb-2">Flow Transition</h3>
         <p class="text-sm text-gray-500 mb-2">Select allowed flow categories for transition to different flows</p>
-        <MultiSelect 
+        <MultiSelect
           v-model="editableStep.allowed_flow_categories"
           :options="flowCategories"
           optionLabel="label"
@@ -90,7 +90,7 @@
       </div>
     </form>
     <template #footer>
-      <Button label="Cancel" icon="pi pi-times" @click="onClose" severity="secondary" />
+      <Button label="Cancel" icon="pi pi-times" @click="closeStepDialog" severity="secondary" />
       <Button label="Save" icon="pi pi-check" @click="onSave" />
     </template>
   </Dialog>
@@ -98,6 +98,8 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useFlowStore } from '~/stores/flow';
 import type { FlowStepTemplate } from '~/composables/useFlowStepTemplate';
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
@@ -105,14 +107,15 @@ import Textarea from 'primevue/textarea';
 import Select from 'primevue/select';
 import MultiSelect from 'primevue/multiselect';
 import Button from 'primevue/button';
-import { useFetchFlowTemplates } from '~/composables/useFlowTemplate';
 
-const props = defineProps<{
-  step: FlowStepTemplate | null;
-  allSteps: FlowStepTemplate[];
-}>();
-
-const emit = defineEmits(['close', 'save']);
+const flowStore = useFlowStore();
+const {
+  isStepDialogVisible,
+  selectedStep,
+  sortedFlowStepTemplates,
+  flowCategories,
+} = storeToRefs(flowStore);
+const { closeStepDialog, saveStep } = flowStore;
 
 const editableStep = ref<FlowStepTemplate | null>(null);
 
@@ -129,20 +132,10 @@ const isQuickReplyOrListPicker = computed(() => {
     return type === 'quick-reply' || type === 'list-picker';
 });
 
-// Fetch flow templates to get categories
-const { flowTemplates } = useFetchFlowTemplates();
-
-const flowCategories = computed(() => {
-  if (!flowTemplates.value) return [];
-  return flowTemplates.value.map(template => ({
-    label: `${template.name} (${template.category})`,
-    value: template.category
-  }));
-});
-
 const stepOptions = computed(() => {
-  return props.allSteps
-    .filter(s => s.id !== props.step?.id)
+  if (!sortedFlowStepTemplates.value) return [];
+  return sortedFlowStepTemplates.value
+    .filter(s => s.id !== selectedStep.value?.id)
     .map(s => ({ label: `${s.step_name} (ID: ${s.id})`, value: s.id }));
 });
 
@@ -162,7 +155,7 @@ const combinedOptions = computed(() => {
     }));
 });
 
-watch(() => props.step, (newStep) => {
+watch(selectedStep, (newStep) => {
   if (newStep) {
     editableStep.value = JSON.parse(JSON.stringify(newStep));
     if (editableStep.value.message_type) {
@@ -180,6 +173,9 @@ const addOption = () => {
   if (!editableStep.value) return;
   const newKey = `${Date.now()}`;
   editableStep.value.options[newKey] = 'New Option';
+  if (!editableStep.value.conditional_next_steps) {
+      editableStep.value.conditional_next_steps = {};
+  }
   editableStep.value.conditional_next_steps[newKey] = null;
 };
 
@@ -195,7 +191,7 @@ const updateOptionText = (key: string, text: string) => {
 }
 
 const updateOptionNextStep = (key: string, nextStepId: number | null) => {
-    if (!editableStep.value) return;
+    if (!editableStep.value || !editableStep.value.conditional_next_steps) return;
     editableStep.value.conditional_next_steps[key] = nextStepId;
 }
 
@@ -216,18 +212,14 @@ const updateConditionKey = (event: Event, oldCondition: string) => {
   const newCondition = (event.target as HTMLInputElement).value;
   if (editableStep.value && editableStep.value.conditional_next_steps) {
     const value = editableStep.value.conditional_next_steps[oldCondition];
-    delete editableStep.value.conditional_next_steps[oldCondition];
+    delete editableStep.value.conditional__steps[oldCondition];
     editableStep.value.conditional_next_steps[newCondition] = value;
   }
 };
 
-const onClose = () => {
-  emit('close');
-};
-
 const onSave = () => {
   if (editableStep.value) {
-    emit('save', editableStep.value);
+    saveStep(editableStep.value);
   }
 };
 </script>
