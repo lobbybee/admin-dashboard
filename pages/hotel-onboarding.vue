@@ -1,33 +1,35 @@
 <template>
-  <div class="p-4">
+  <div class="min-h-screen bg-gray-50 page-container">
     <Toast />
-    <div class="card">
-      <HotelList
-        :hotels="data?.results"
-        :loading="isPending"
-        :total-records="data?.count"
-        :page-size="Number(route.query.page_size) || 10"
-        v-model:search="searchFilter"
-        v-model:status="statusFilter"
-        @page-changed="onPage"
-        @view-details="onViewDetails"
-        @search="onSearch"
-        @create-hotel="onCreateHotel"
+    <div class="content-container">
+      <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+        <HotelList
+          :hotels="data?.results"
+          :loading="isPending"
+          :total-records="data?.count"
+          :page-size="Number(route.query.page_size) || 10"
+          v-model:search="searchFilter"
+          v-model:status="statusFilter"
+          @page-changed="onPage"
+          @view-details="onViewDetails"
+          @search="onSearch"
+          @create-hotel="onCreateHotel"
+        />
+      </div>
+
+      <HotelDetailsDialog
+        v-model:visible="isDetailsDialogVisible"
+        :hotel="selectedHotel"
+        @hotel-updated="refetch"
+        class="w-full min-w-[350px] max-w-xl"
+      />
+
+      <CreateDialog
+        v-model:visible="isCreateDialogVisible"
+        @hotel-created="onHotelCreated"
+        class="w-full min-w-[350px] max-w-xl"
       />
     </div>
-
-    <HotelDetailsDialog
-      v-model:visible="isDetailsDialogVisible"
-      :hotel="selectedHotel"
-      @hotel-updated="refetch"
-      class="w-full min-w-[350px] max-w-xl"
-    />
-
-    <CreateDialog
-      v-model:visible="isCreateDialogVisible"
-      @hotel-created="onHotelCreated"
-      class="w-full min-w-[350px] max-w-xl"
-    />
   </div>
 </template>
 

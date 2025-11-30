@@ -1,104 +1,237 @@
 <template>
-  <Dialog :visible="visible" @update:visible="$emit('update:visible', $event)" :header="`${isEdit ? 'Edit' : 'Add'} Staff User`" modal >
-    <div class="p-4">
-      <div class="flex flex-col gap-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label for="username" class="block mb-2">Username *</label>
-            <InputText
-              id="username"
-              v-model="formData.username"
-              :disabled="isEdit"
-              class="w-full"
-              :class="{ 'p-invalid': errors.username }"
-            />
-            <small v-if="errors.username" class="p-error">{{ errors.username }}</small>
-          </div>
-
-          <div>
-            <label for="email" class="block mb-2">Email *</label>
-            <InputText
-              id="email"
-              v-model="formData.email"
-              type="email"
-              class="w-full"
-              :class="{ 'p-invalid': errors.email }"
-            />
-            <small v-if="errors.email" class="p-error">{{ errors.email }}</small>
-          </div>
-        </div>
-
-        <div v-if="!isEdit" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label for="password" class="block mb-2">Password *</label>
-            <Password
-              id="password"
-              v-model="formData.password"
-              class="w-full"
-              :class="{ 'p-invalid': errors.password }"
-              toggle-mask
-              :feedback="false"
-            />
-            <small v-if="errors.password" class="p-error">{{ errors.password }}</small>
-          </div>
-
-          <div>
-            <label for="confirmPassword" class="block mb-2">Confirm Password *</label>
-            <Password
-              id="confirmPassword"
-              v-model="formData.confirmPassword"
-              class="w-full"
-              :class="{ 'p-invalid': errors.confirmPassword }"
-              toggle-mask
-              :feedback="false"
-            />
-            <small v-if="errors.confirmPassword" class="p-error">{{ errors.confirmPassword }}</small>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label for="userType" class="block mb-2">User Type *</label>
-            <Select
-              id="userType"
-              v-model="formData.user_type"
-              :options="userTypeOptions"
-              option-label="label"
-              option-value="value"
-              class="w-full"
-              :class="{ 'p-invalid': errors.user_type }"
-            />
-            <small v-if="errors.user_type" class="p-error">{{ errors.user_type }}</small>
-          </div>
-
-          <div>
-            <label for="phone" class="block mb-2">Phone Number</label>
-            <InputText
-              id="phone"
-              v-model="formData.phone_number"
-              class="w-full"
-              :class="{ 'p-invalid': errors.phone_number }"
-            />
-            <small v-if="errors.phone_number" class="p-error">{{ errors.phone_number }}</small>
-          </div>
-        </div>
+  <Dialog
+    :visible="visible"
+    @update:visible="$emit('update:visible', $event)"
+    :header="`${isEdit ? 'Edit' : 'Add'} Staff Member`"
+    modal
+    class="w-full max-w-2xl"
+    :content-style="{ padding: '0' }"
+    :header-style="{ padding: '1.5rem', borderBottom: '1px solid #e5e7eb' }"
+    :footer-style="{ padding: '1.5rem', borderTop: '1px solid #e5e7eb' }"
+  >
+    <div class="p-6">
+      <!-- Form Header Description -->
+      <div v-if="!isEdit" class="mb-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-2">Create New Staff Account</h3>
+        <p class="text-sm text-gray-600">Add a new staff member to your hotel management system. They will receive login credentials via email.</p>
       </div>
+      <div v-else class="mb-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-2">Edit Staff Member</h3>
+        <p class="text-sm text-gray-600">Update the information for this staff member. Leave password fields empty to keep the current password.</p>
+      </div>
+
+      <!-- Form Content -->
+      <form class="space-y-6" @submit.prevent="handleSubmit">
+        <!-- Account Information Section -->
+        <div class="space-y-4">
+          <h4 class="text-sm font-medium text-gray-900 flex items-center gap-2">
+            <div class="w-4 h-4 bg-blue-100 rounded-full flex items-center justify-center">
+              <span class="text-xs font-medium text-blue-600">1</span>
+            </div>
+            Account Information
+          </h4>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Username Field -->
+            <div class="space-y-1">
+              <label for="username" class="block text-sm font-medium text-gray-700">
+                Username <span class="text-red-500">*</span>
+              </label>
+              <InputText
+                id="username"
+                v-model="formData.username"
+                type="text"
+                :disabled="isEdit"
+                :class="{ 'p-invalid': errors.username }"
+                :aria-invalid="errors.username ? 'true' : 'false'"
+                :aria-describedby="errors.username ? 'username-error' : 'username-help'"
+                placeholder="Enter username"
+                class="w-full"
+              />
+              <small v-if="!errors.username" id="username-help" class="text-gray-500 text-xs block">
+                Unique identifier for the staff member
+              </small>
+              <small v-if="errors.username" id="username-error" class="p-error text-sm mt-1 block" role="alert">
+                {{ errors.username }}
+              </small>
+            </div>
+
+            <!-- Email Field -->
+            <div class="space-y-1">
+              <label for="email" class="block text-sm font-medium text-gray-700">
+                Email Address <span class="text-red-500">*</span>
+              </label>
+              <InputText
+                id="email"
+                v-model="formData.email"
+                type="email"
+                :class="{ 'p-invalid': errors.email }"
+                :aria-invalid="errors.email ? 'true' : 'false'"
+                :aria-describedby="errors.email ? 'email-error' : 'email-help'"
+                placeholder="staff@example.com"
+                class="w-full"
+              />
+              <small v-if="!errors.email" id="email-help" class="text-gray-500 text-xs block">
+                Staff member's professional email address
+              </small>
+              <small v-if="errors.email" id="email-error" class="p-error text-sm mt-1 block" role="alert">
+                {{ errors.email }}
+              </small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Password Section (only for new users) -->
+        <div v-if="!isEdit" class="space-y-4">
+          <h4 class="text-sm font-medium text-gray-900 flex items-center gap-2">
+            <div class="w-4 h-4 bg-blue-100 rounded-full flex items-center justify-center">
+              <span class="text-xs font-medium text-blue-600">2</span>
+            </div>
+            Security Information
+          </h4>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Password Field -->
+            <div class="space-y-1">
+              <label for="password" class="block text-sm font-medium text-gray-700">
+                Password <span class="text-red-500">*</span>
+              </label>
+              <Password
+                id="password"
+                v-model="formData.password"
+                :class="{ 'p-invalid': errors.password }"
+                :aria-invalid="errors.password ? 'true' : 'false'"
+                :aria-describedby="errors.password ? 'password-error' : 'password-help'"
+                placeholder="Enter secure password"
+                toggle-mask
+                :feedback="false"
+                class="w-full"
+              />
+              <small v-if="!errors.password" id="password-help" class="text-gray-500 text-xs block">
+                Minimum 8 characters with a mix of letters and numbers
+              </small>
+              <small v-if="errors.password" id="password-error" class="p-error text-sm mt-1 block" role="alert">
+                {{ errors.password }}
+              </small>
+            </div>
+
+            <!-- Confirm Password Field -->
+            <div class="space-y-1">
+              <label for="confirmPassword" class="block text-sm font-medium text-gray-700">
+                Confirm Password <span class="text-red-500">*</span>
+              </label>
+              <Password
+                id="confirmPassword"
+                v-model="formData.confirmPassword"
+                :class="{ 'p-invalid': errors.confirmPassword }"
+                :aria-invalid="errors.confirmPassword ? 'true' : 'false'"
+                :aria-describedby="errors.confirmPassword ? 'confirm-password-error' : 'confirm-password-help'"
+                placeholder="Re-enter password"
+                toggle-mask
+                :feedback="false"
+                class="w-full"
+              />
+              <small v-if="!errors.confirmPassword" id="confirm-password-help" class="text-gray-500 text-xs block">
+                Re-enter the password to confirm
+              </small>
+              <small v-if="errors.confirmPassword" id="confirm-password-error" class="p-error text-sm mt-1 block" role="alert">
+                {{ errors.confirmPassword }}
+              </small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Role and Contact Section -->
+        <div class="space-y-4">
+          <h4 class="text-sm font-medium text-gray-900 flex items-center gap-2">
+            <div class="w-4 h-4 bg-blue-100 rounded-full flex items-center justify-center">
+              <span class="text-xs font-medium text-blue-600">3</span>
+            </div>
+            Role & Contact Information
+          </h4>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- User Type Field -->
+            <div class="space-y-1">
+              <label for="userType" class="block text-sm font-medium text-gray-700">
+                User Role <span class="text-red-500">*</span>
+              </label>
+              <Dropdown
+                id="userType"
+                v-model="formData.user_type"
+                :options="userTypeOptions || []"
+                option-label="label"
+                option-value="value"
+                placeholder="Select a role"
+                :class="{ 'p-invalid': errors.user_type }"
+                :aria-invalid="errors.user_type ? 'true' : 'false'"
+                :aria-describedby="errors.user_type ? 'user-type-error' : 'user-type-help'"
+                class="w-full"
+              />
+              <small v-if="!errors.user_type" id="user-type-help" class="text-gray-500 text-xs block">
+                Determines system permissions and access level
+              </small>
+              <small v-if="errors.user_type" id="user-type-error" class="p-error text-sm mt-1 block" role="alert">
+                {{ errors.user_type }}
+              </small>
+            </div>
+
+            <!-- Phone Number Field -->
+            <div class="space-y-1">
+              <label for="phone" class="block text-sm font-medium text-gray-700">
+                Phone Number
+              </label>
+              <InputText
+                id="phone"
+                v-model="formData.phone_number"
+                type="tel"
+                :class="{ 'p-invalid': errors.phone_number }"
+                :aria-invalid="errors.phone_number ? 'true' : 'false'"
+                :aria-describedby="errors.phone_number ? 'phone-error' : 'phone-help'"
+                placeholder="+1 (555) 123-4567"
+                class="w-full"
+              />
+              <small v-if="!errors.phone_number" id="phone-help" class="text-gray-500 text-xs block">
+                Optional contact number for the staff member
+              </small>
+              <small v-if="errors.phone_number" id="phone-error" class="p-error text-sm mt-1 block" role="alert">
+                {{ errors.phone_number }}
+              </small>
+            </div>
+          </div>
+        </div>
+      </form>
     </div>
 
     <template #footer>
-      <Button label="Cancel" icon="pi pi-times" @click="$emit('update:visible', false)" class="p-button-text" />
-      <Button :label="isEdit ? 'Update' : 'Create'" icon="pi pi-check" @click="handleSubmit" :loading="loading" />
+      <div class="flex flex-col sm:flex-row sm:justify-end gap-3">
+        <button
+          @click="$emit('update:visible', false)"
+          class="w-full sm:w-auto px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 font-medium rounded-lg border border-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        >
+          Cancel
+        </button>
+        <button
+          @click="handleSubmit"
+          :disabled="loading"
+          class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <i v-if="loading" class="pi pi-spin pi-spinner"></i>
+          <i v-else class="pi pi-check"></i>
+          {{ isEdit ? 'Update Staff Member' : 'Create Staff Member' }}
+        </button>
+      </div>
     </template>
   </Dialog>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
 import Password from 'primevue/password';
-import Select from 'primevue/select';
+import Dropdown from 'primevue/dropdown';
 import type { StaffUser, StaffUserCreateRequest, StaffUserUpdateRequest } from '~/types/staff';
 
 const props = defineProps<{
@@ -114,6 +247,7 @@ const emit = defineEmits<{
 
 const isEdit = computed(() => !!props.user);
 
+// Initialize form data with default values
 const formData = ref({
   username: '',
   email: '',
@@ -125,20 +259,21 @@ const formData = ref({
 
 const errors = ref<Record<string, string>>({});
 
+// Define user type options as a constant to avoid reactivity issues
 const userTypeOptions = [
   { label: 'Platform Admin', value: 'platform_admin' },
   { label: 'Platform Staff', value: 'platform_staff' }
-];
+] as const;
 
 // Reset form when user changes
 watch(() => props.user, (newUser) => {
-  if (newUser) {
+  if (newUser && typeof newUser === 'object') {
     formData.value = {
-      username: newUser.username,
-      email: newUser.email,
+      username: newUser.username || '',
+      email: newUser.email || '',
       password: '',
       confirmPassword: '',
-      user_type: newUser.user_type,
+      user_type: newUser.user_type || 'platform_staff',
       phone_number: newUser.phone_number || ''
     };
   } else {

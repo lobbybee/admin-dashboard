@@ -1,6 +1,24 @@
 <template>
-  <Dialog :visible="visible" @update:visible="$emit('update:visible', $event)" header="Create New Hotel" modal style="max-width: 800px;">
-    <CreateForm @submit="onCreateHotel" @cancel="$emit('update:visible', false)" />
+  <Dialog
+    :visible="visible"
+    @update:visible="$emit('update:visible', $event)"
+    header="Create New Hotel"
+    modal
+    class="w-full max-w-2xl"
+    :content-style="{ padding: 0 }"
+  >
+    <div class="p-6">
+      <div class="flex items-center gap-4 mb-6">
+        <div class="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
+          <i class="pi pi-building text-blue-600 text-xl"></i>
+        </div>
+        <div class="flex-1">
+          <h2 class="text-xl font-semibold text-gray-900">Create New Hotel</h2>
+          <p class="text-sm text-gray-600 mt-1">Add a new hotel to the system and set up an admin account</p>
+        </div>
+      </div>
+      <CreateForm @submit="onCreateHotel" @cancel="$emit('update:visible', false)" />
+    </div>
   </Dialog>
 </template>
 
