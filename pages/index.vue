@@ -223,13 +223,13 @@
 
             <div class="space-y-2">
               <a
-                href="/admin/hotel-onboarding"
+                href="/hotel-onboarding"
                 class="quick-action-btn"
               >
                 Manage Hotels
               </a>
               <a
-                href="/admin/reports"
+                href="/reports"
                 class="quick-action-btn"
               >
                 View Analytics
