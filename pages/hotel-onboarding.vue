@@ -12,6 +12,7 @@
           v-model:status="statusFilter"
           @page-changed="onPage"
           @view-details="onViewDetails"
+          @view-qr="onViewQR"
           @search="onSearch"
           @create-hotel="onCreateHotel"
         />
@@ -29,6 +30,12 @@
         @hotel-created="onHotelCreated"
         class="w-full min-w-[350px] max-w-xl"
       />
+
+      <QRCodeDialog
+        v-model:visible="isQRDialogVisible"
+        :hotel-id="selectedHotel?.id || ''"
+        :hotel-name="selectedHotel?.name || ''"
+      />
     </div>
   </div>
 </template>
@@ -43,6 +50,7 @@ import { useFetchHotels, type Hotel } from '~/composables/useHotel';
 import HotelList from '~/components/Hotel/List.vue';
 import HotelDetailsDialog from '~/components/Hotel/DetailsDialog.vue';
 import CreateDialog from '~/components/Hotel/CreateDialog.vue';
+import QRCodeDialog from '~/components/Hotel/QRCodeDialog.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -57,6 +65,7 @@ const statusFilter = ref(route.query.status as string | null);
 // State for dialogs
 const isDetailsDialogVisible = ref(false);
 const isCreateDialogVisible = ref(false);
+const isQRDialogVisible = ref(false);
 const selectedHotel = ref<Hotel | null>(null);
 
 const updateRoute = (query: Record<string, any>) => {
@@ -76,6 +85,11 @@ const onPage = (event: DataTablePageEvent) => {
 const onViewDetails = (hotel: Hotel) => {
   selectedHotel.value = hotel;
   isDetailsDialogVisible.value = true;
+};
+
+const onViewQR = (hotel: Hotel) => {
+  selectedHotel.value = hotel;
+  isQRDialogVisible.value = true;
 };
 
 const onSearch = () => {

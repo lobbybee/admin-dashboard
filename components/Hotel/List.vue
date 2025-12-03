@@ -54,12 +54,13 @@
 
     <!-- Hotel Cards Grid -->
     <div v-else-if="hotels && hotels.length > 0" class="p-6 bg-gray-50">
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+      <div class="grid grid-cols-1  md:grid-cols-2 xl:grid-cols-3 gap-6 max-w-7xl mx-auto">
         <HotelCard
           v-for="hotel in hotels"
           :key="hotel.id"
           :hotel="hotel"
           @view-details="$emit('view-details', hotel)"
+          @view-qr="$emit('view-qr', hotel)"
         />
       </div>
     </div>
@@ -115,6 +116,7 @@ defineProps<{
 const emit = defineEmits<{
   (e: 'page-changed', event: DataTablePageEvent): void;
   (e: 'view-details', hotel: Hotel): void;
+  (e: 'view-qr', hotel: Hotel): void;
   (e: 'update:search', value: string): void;
   (e: 'update:status', value: string | undefined): void;
   (e: 'search'): void;

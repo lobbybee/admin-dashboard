@@ -83,8 +83,18 @@
         </div>
       </div>
 
-      <!-- Action Button -->
-      <div class="pt-4 border-t border-gray-100">
+      <!-- Action Buttons -->
+      <div class="pt-4 border-t border-gray-100 space-y-3">
+        <Button
+          label="View QR Code"
+          icon="pi pi-qrcode"
+          icon-pos="right"
+          @click="$emit('view-qr', hotel)"
+          class="w-full"
+          severity="primary"
+          variant="outlined"
+          v-if="hotel.status === 'verified'"
+        />
         <Button
           label="View Details"
           icon="pi pi-arrow-right"
@@ -110,5 +120,6 @@ defineProps<{
 
 defineEmits<{
   (e: 'view-details', hotel: Hotel): void;
+  (e: 'view-qr', hotel: Hotel): void;
 }>();
 </script>
