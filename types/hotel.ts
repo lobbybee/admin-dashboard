@@ -72,3 +72,26 @@ export interface CreateHotelData {
   first_name?: string;
   last_name?: string;
 }
+
+export interface UpdateHotelData {
+  name?: string;
+  description?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  pincode?: string;
+  phone?: string;
+  email?: string;
+  google_review_link?: string;
+  latitude?: number;
+  longitude?: number;
+  qr_code_url?: string;
+  check_in_time?: string;
+  time_zone?: string;
+}
+
+export interface UpdateHotelDocumentData {
+  document_type: 'license' | 'registration' | 'other';
+  document_file?: File;
+}

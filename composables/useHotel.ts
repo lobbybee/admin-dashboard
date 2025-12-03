@@ -1,7 +1,7 @@
 import { computed, type Ref } from 'vue';
 import { useAPI } from './useAPI';
 import { useRoute } from 'vue-router';
-import type { PaginatedHotels, ListHotelsParams, Hotel, VerifyHotelData, RejectHotelData, CreateHotelData } from '~/types/hotel';
+import type { PaginatedHotels, ListHotelsParams, Hotel, VerifyHotelData, RejectHotelData, CreateHotelData, UpdateHotelData, UpdateHotelDocumentData } from '~/types/hotel';
 
 // --------------------------------------------------------------------------------
 // Composables
@@ -116,7 +116,6 @@ export const useRejectHotel = () => {
   };
 };
 
-
 /**
  * Toggles the is_active status of a hotel.
  */
@@ -147,7 +146,7 @@ export const useCreateHotel = () => {
 
   const mutationResult = useMutation({
     mutation: async (data: CreateHotelData) => {
-      return API(`/admin/create-hotel/`, {
+      return API('/admin/create-hotel/', {
         method: 'POST',
         body: data
       });
@@ -156,6 +155,96 @@ export const useCreateHotel = () => {
 
   return {
     createHotel: mutationResult.mutateAsync,
+    status: mutationResult.status,
+    error: mutationResult.error,
+    isLoading: mutationResult.isLoading,
+  };
+};
+
+/**
+ * Updates hotel basic information and settings.
+ */
+export const useUpdateHotel = () => {
+  const { API } = useAPI();
+
+  const mutationResult = useMutation({
+    mutation: async ({ id, data }: { id: string; data: UpdateHotelData }) => {
+      return API(`/admin/hotels/${id}/`, {
+        method: 'PATCH',
+        body: data
+      });
+    }
+  });
+
+  return {
+    updateHotel: mutationResult.mutateAsync,
+    status: mutationResult.status,
+    error: mutationResult.error,
+    isLoading: mutationResult.isLoading,
+  };
+};
+
+/**
+ * Updates hotel verification documents.
+ * If documentId is provided, updates that specific document.
+ * If documentId is not provided, uses update-by-type endpoint (creates new or updates existing by type).
+ */
+export const useUpdateHotelDocument = () => {
+  const { API } = useAPI();
+
+  const mutationResult = useMutation({
+    mutation: async ({ hotelId, documentId, data }: { hotelId: string; documentId?: string; data: UpdateHotelDocumentData }) => {
+      // If documentId is provided, update specific document
+      if (documentId) {
+        if (data.document_file) {
+          const formData = new FormData();
+          formData.append('document_type', data.document_type);
+          formData.append('document_file', data.document_file);
+
+          return API(`/admin/hotels/${hotelId}/documents/${documentId}/`, {
+            method: 'PATCH',
+            body: formData,
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+          });
+        } else {
+          return API(`/admin/hotels/${hotelId}/documents/${documentId}/`, {
+            method: 'PATCH',
+            body: {
+              document_type: data.document_type
+            }
+          });
+        }
+      } 
+      // If no documentId, use update-by-type endpoint (creates new or updates existing)
+      else {
+        if (data.document_file) {
+          const formData = new FormData();
+          formData.append('document_type', data.document_type);
+          formData.append('document_file', data.document_file);
+
+          return API(`/admin/hotels/${hotelId}/documents/update-by-type/`, {
+            method: 'PATCH',
+            body: formData,
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+          });
+        } else {
+          return API(`/admin/hotels/${hotelId}/documents/update-by-type/`, {
+            method: 'PATCH',
+            body: {
+              document_type: data.document_type
+            }
+          });
+        }
+      }
+    }
+  });
+
+  return {
+    updateHotelDocument: mutationResult.mutateAsync,
     status: mutationResult.status,
     error: mutationResult.error,
     isLoading: mutationResult.isLoading,
