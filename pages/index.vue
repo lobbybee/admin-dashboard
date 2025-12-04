@@ -13,25 +13,29 @@
       </div>
 
       <!-- Date Range Filter -->
-      <div class="date-filter-container flex flex-col sm:flex-row sm:items-center gap-3 bg-white p-4 rounded-lg border border-gray-200">
-        <div class="date-input-group flex items-center gap-3">
+      <div class="date-filter-container relative">
+        <div class="flex items-center gap-2 bg-white/95 backdrop-blur-sm px-3 py-2 rounded-lg border border-gray-200/60 shadow-sm">
+          <Icon name="prime:calendar" class="w-4 h-4 text-gray-500 flex-shrink-0" />
           <label
             for="date-range"
-            class="text-sm font-medium text-gray-700 whitespace-nowrap"
+            class="text-xs sm:text-sm font-medium text-gray-600 hidden sm:block"
           >
-            Date Range
+            Period
           </label>
           <select
             id="date-range"
             v-model="selectedDateRange"
             @change="handleDateRangeChange"
-            class="form-select min-w-[140px]"
+            class="flex-1 min-w-0 bg-transparent border-0 text-sm text-gray-900 focus:outline-none focus:ring-0 cursor-pointer"
           >
-            <option value="30">Last 30 days</option>
             <option value="7">Last 7 days</option>
+            <option value="30">Last 30 days</option>
             <option value="90">Last 90 days</option>
             <option value="custom">Custom Range</option>
           </select>
+          <div class="w-4 h-4 flex items-center justify-center pointer-events-none">
+            <div class="w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[5px] border-t-gray-400"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -590,11 +594,11 @@ useHead({
   }
 
   .date-filter-container {
-    @apply flex-col items-stretch space-y-3;
+    @apply w-full;
   }
 
-  .date-input-group {
-    @apply flex flex-col space-y-2;
+  .date-filter-container > div {
+    @apply max-w-full;
   }
 
   .header-section {
@@ -647,20 +651,8 @@ useHead({
     @apply flex-col items-center text-center space-y-4;
   }
 
-  .date-filter {
+  .date-filter-container {
     @apply w-full max-w-xs;
-  }
-
-  .filter-section {
-    @apply flex-col items-start space-y-4;
-  }
-
-  .date-input-group {
-    @apply w-full;
-  }
-
-  .form-select {
-    @apply w-full;
   }
 }
 
@@ -684,8 +676,12 @@ useHead({
     @apply min-h-[44px];
   }
 
-  .form-select {
-    @apply min-h-[44px] text-base;
+  .date-filter-container > div {
+    @apply min-h-[44px];
+  }
+
+  .date-filter-container select {
+    @apply text-base;
   }
 }
 
