@@ -14,27 +14,46 @@
 
       <!-- Date Range Filter -->
       <div class="date-filter-container relative">
-        <div class="flex items-center gap-2 bg-white/95 backdrop-blur-sm px-3 py-2 rounded-lg border border-gray-200/60 shadow-sm">
-          <Icon name="prime:calendar" class="w-4 h-4 text-gray-500 flex-shrink-0" />
-          <label
-            for="date-range"
-            class="text-xs sm:text-sm font-medium text-gray-600 hidden sm:block"
+        <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+          <!-- Date Range Selector -->
+          <div class="flex items-center gap-2 bg-white/95 backdrop-blur-sm px-3 py-2 rounded-lg border border-gray-200/60 shadow-sm">
+            <Icon name="prime:calendar" class="w-4 h-4 text-gray-500 flex-shrink-0" />
+            <label
+              for="date-range"
+              class="text-xs sm:text-sm font-medium text-gray-600 hidden sm:block"
+            >
+              Period
+            </label>
+            <select
+              id="date-range"
+              v-model="selectedDateRange"
+              @change="handleDateRangeChange"
+              class="flex-1 min-w-0 bg-transparent border-0 text-sm text-gray-900 focus:outline-none focus:ring-0 cursor-pointer"
+            >
+              <option value="7">Last 7 days</option>
+              <option value="30">Last 30 days</option>
+              <option value="90">Last 90 days</option>
+              <option value="custom">Custom Range</option>
+            </select>
+            <div class="w-4 h-4 flex items-center justify-center pointer-events-none">
+              <div class="w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[5px] border-t-gray-400"></div>
+            </div>
+          </div>
+
+          <!-- Custom Date Range Picker -->
+          <div 
+            v-if="selectedDateRange === 'custom' && showCustomDatePicker"
+            class="flex items-center gap-2 bg-white/95 backdrop-blur-sm px-3 py-2 rounded-lg border border-gray-200/60 shadow-sm"
           >
-            Period
-          </label>
-          <select
-            id="date-range"
-            v-model="selectedDateRange"
-            @change="handleDateRangeChange"
-            class="flex-1 min-w-0 bg-transparent border-0 text-sm text-gray-900 focus:outline-none focus:ring-0 cursor-pointer"
-          >
-            <option value="7">Last 7 days</option>
-            <option value="30">Last 30 days</option>
-            <option value="90">Last 90 days</option>
-            <option value="custom">Custom Range</option>
-          </select>
-          <div class="w-4 h-4 flex items-center justify-center pointer-events-none">
-            <div class="w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[5px] border-t-gray-400"></div>
+            <DatePicker
+              v-model="customDateRange"
+              selectionMode="range"
+              :manualInput="false"
+              placeholder="Select date range"
+              class="w-full"
+              dateFormat="mm/dd/yy"
+              showIcon
+            />
           </div>
         </div>
       </div>
@@ -428,6 +447,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
+import DatePicker from 'primevue/datepicker';
 import { useFetchOverviewStats, type StatParams } from '~/composables/useStat';
 
 // Page metadata
@@ -438,6 +458,8 @@ definePageMeta({
 
 // Reactive state
 const selectedDateRange = ref<string>('30');
+const customDateRange = ref<[Date, Date] | null>(null);
+const showCustomDatePicker = ref<boolean>(false);
 
 // Calculate date range based on selection
 const dateParams = computed<StatParams>(() => {
@@ -445,19 +467,31 @@ const dateParams = computed<StatParams>(() => {
   const endDate = today.toISOString().split('T')[0];
 
   let startDate: string;
-  const days = parseInt(selectedDateRange.value);
 
-  if (selectedDateRange.value === 'custom') {
-    // For custom range, default to last 30 days
+  if (selectedDateRange.value === 'custom' && customDateRange.value && customDateRange.value.length === 2 && customDateRange.value[0] && customDateRange.value[1]) {
+    // Use custom date range
+    startDate = customDateRange.value[0].toISOString().split('T')[0];
+    const customEndDate = customDateRange.value[1].toISOString().split('T')[0];
+    return {
+      start_date: startDate,
+      end_date: customEndDate,
+    };
+  } else if (selectedDateRange.value === 'custom') {
+    // For custom range but no dates selected yet, default to last 30 days
     startDate = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0];
+    return {
+      start_date: startDate,
+      end_date: endDate,
+    };
   } else {
+    // Use predefined range
+    const days = parseInt(selectedDateRange.value);
     startDate = new Date(today.getTime() - (days * 24 * 60 * 60 * 1000)).toISOString().split('T')[0];
+    return {
+      start_date: startDate,
+      end_date: endDate,
+    };
   }
-
-  return {
-    start_date: startDate,
-    end_date: endDate,
-  };
 });
 
 // Fetch overview statistics
@@ -470,9 +504,28 @@ const {
 
 // Handle date range change
 const handleDateRangeChange = () => {
+  if (selectedDateRange.value === 'custom') {
+    showCustomDatePicker.value = true;
+    // Initialize with default range if no custom range exists
+    if (!customDateRange.value) {
+      const today = new Date();
+      const thirtyDaysAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
+      customDateRange.value = [thirtyDaysAgo, today];
+    }
+  } else {
+    showCustomDatePicker.value = false;
+  }
   // The computed dateParams will automatically update
   // and trigger a refetch due to the reactive reference
 };
+
+// Watch for changes in custom date range
+watch(customDateRange, (newRange) => {
+  if (newRange && newRange.length === 2 && newRange[0] && newRange[1] && selectedDateRange.value === 'custom') {
+    // The dateParams computed will automatically update
+    // and trigger a refetch due to the reactive reference
+  }
+});
 
 // Format date for display
 const formatDate = (dateString: string) => {
@@ -516,6 +569,31 @@ useHead({
 /* Form select styles */
 .form-select {
   @apply block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm bg-white;
+}
+
+/* PrimeVue DatePicker custom styles */
+:deep(.p-datepicker) {
+  @apply border border-gray-200 rounded-lg shadow-lg;
+}
+
+:deep(.p-datepicker-input) {
+  @apply text-sm border-0 bg-transparent focus:outline-none focus:ring-0;
+}
+
+:deep(.p-datepicker .p-datepicker-header) {
+  @apply bg-gray-50 border-b border-gray-200;
+}
+
+:deep(.p-datepicker .p-datepicker-calendar td span) {
+  @apply rounded-md;
+}
+
+:deep(.p-datepicker .p-datepicker-calendar td span.p-highlight) {
+  @apply bg-blue-500 text-white;
+}
+
+:deep(.p-datepicker .p-datepicker-calendar td span:hover:not(.p-highlight)) {
+  @apply bg-gray-100;
 }
 
 /* Card styles */
@@ -598,7 +676,7 @@ useHead({
   }
 
   .date-filter-container > div {
-    @apply max-w-full;
+    @apply w-full space-y-2;
   }
 
   .header-section {
