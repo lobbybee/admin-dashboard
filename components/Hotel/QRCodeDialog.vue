@@ -128,6 +128,8 @@ const downloadQRCode = async () => {
     const tempContainer = document.createElement('div');
     tempContainer.style.position = 'absolute';
     tempContainer.style.left = '-9999px';
+    tempContainer.style.width = '1080px';
+    tempContainer.style.height = '1080px';
     document.body.appendChild(tempContainer);
 
     // Create QR code with logo
@@ -154,11 +156,17 @@ const downloadQRCode = async () => {
     // Append QR code to temporary container
     highQualityQR.append(tempContainer);
 
-    // Wait for render
-    await new Promise(resolve => setTimeout(resolve, 300));
+    // Wait for render with longer delay
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     // Get the canvas element
     const qrCanvas = tempContainer.querySelector('canvas');
+    
+    // Ensure canvas is properly rendered
+    if (!qrCanvas) {
+      console.error('QR code canvas not found');
+      throw new Error('Failed to generate QR code canvas');
+    }
 
     if (qrCanvas) {
       // Create a new canvas for our composite image with increased padding
