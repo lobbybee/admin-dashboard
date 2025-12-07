@@ -467,6 +467,8 @@
                                             "
                                             time-only
                                             hour-format="24"
+                                            :step-minute="15"
+                                            show-time
                                             class="w-full"
                                             placeholder="Select check-in time"
                                         />
@@ -1358,7 +1360,29 @@ const saveHotelDetails = async () => {
         Object.keys(hotelFormData.value).forEach((key) => {
             const value =
                 hotelFormData.value[key as keyof typeof hotelFormData.value];
-            if (value !== "" && value !== null) {
+            
+            // Format time value to ensure it's in HH:MM format
+            if (key === 'check_in_time' && value) {
+                // Convert Date object or time string to HH:MM format
+                if (value instanceof Date) {
+                    const hours = value.getHours().toString().padStart(2, '0');
+                    const minutes = value.getMinutes().toString().padStart(2, '0');
+                    updateData[key] = `${hours}:${minutes}`;
+                } else if (typeof value === 'string') {
+                    // If it's already a string, ensure it's in HH:MM format
+                    // Handle various possible input formats
+                    const timeMatch = value.match(/(\d{1,2}):(\d{2})(?::\d{2})?/);
+                    if (timeMatch) {
+                        const hours = parseInt(timeMatch[1]).toString().padStart(2, '0');
+                        const minutes = parseInt(timeMatch[2]).toString().padStart(2, '0');
+                        updateData[key] = `${hours}:${minutes}`;
+                    } else {
+                        updateData[key] = value;
+                    }
+                } else {
+                    updateData[key] = value;
+                }
+            } else if (value !== "" && value !== null) {
                 updateData[key] = value;
             }
         });
