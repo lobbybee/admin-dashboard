@@ -511,11 +511,11 @@
                                     </template>
                                 </div>
                             </div>
-                            
+
                         </div>
 
                         <!-- Toggle Upload Form Button - Always visible when upload form is hidden -->
-                        <div v-if="!showUploadForm" class="text-center py-4">
+                        <!-- <div v-if="!showUploadForm" class="text-center py-4">
                             <Button
                                 label="Add Document"
                                 icon="pi pi-plus"
@@ -523,7 +523,7 @@
                                 severity="primary"
                                 size="small"
                             />
-                        </div>
+                        </div> -->
                     </div>
                 </TabPanel>
 
@@ -706,7 +706,7 @@
                                     </Column>
                                 </DataTable>
                             </div>
-                            
+
                             <!-- Add Document Button - Always visible when upload form is hidden -->
                             <div v-if="!showUploadForm" class="text-center py-4">
                                 <Button
@@ -1360,7 +1360,7 @@ const saveHotelDetails = async () => {
         Object.keys(hotelFormData.value).forEach((key) => {
             const value =
                 hotelFormData.value[key as keyof typeof hotelFormData.value];
-            
+
             // Format time value to ensure it's in HH:MM format
             if (key === 'check_in_time' && value) {
                 // Convert Date object or time string to HH:MM format
