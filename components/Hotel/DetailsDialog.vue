@@ -530,6 +530,15 @@
                 <TabPanel header="Documents">
                     <div class="p-6">
                         <!-- Document Upload Section -->
+                        <div v-if="!showUploadForm" class="text-center py-4">
+                                                    <Button
+                                                        label="Add Document"
+                                                        icon="pi pi-plus"
+                                                        @click="showUploadForm = true"
+                                                        severity="primary"
+                                                        size="small"
+                                                    />
+                                                </div>
                         <div
                             v-if="showUploadForm"
                             class="bg-white rounded-lg border border-gray-200 p-6 mb-6"
