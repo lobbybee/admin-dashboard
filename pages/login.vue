@@ -48,6 +48,8 @@
 </template>
 
 <script setup lang="ts">
+import { AuthenticationError, APIError } from '~/composables/useAPI'
+
 definePageMeta({
   layout: 'auth'
 })
@@ -73,8 +75,12 @@ async function handleLogin() {
     // Redirect to dashboard after successful login
     router.push('/')
   } catch (err: unknown) {
+    // Handle AuthenticationError specifically
+    if (err instanceof AuthenticationError) {
+      error.value = err.message
+    }
     // Handle APIError specifically
-    if (err instanceof APIError && err.data && err.data.detail) {
+    else if (err instanceof APIError && err.data && err.data.detail) {
       error.value = err.data.detail
     } else if (err instanceof Error) {
       error.value = err.message || 'Invalid username or password'

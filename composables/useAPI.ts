@@ -128,6 +128,14 @@ export const useAPI = () => {
         method: 'POST',
         body: credentials,
       });
+      
+      // Check if user_type is valid (platform_admin or platform_staff)
+      const validUserTypes = ['platform_admin', 'platform_staff'];
+      if (!response.user || !validUserTypes.includes(response.user.user_type)) {
+        clearAuthData();
+        throw new AuthenticationError("Access denied. Only platform administrators and staff are allowed to login.");
+      }
+      
       authToken.value = response.access;
       refreshToken.value = response.refresh;
       authStore.setUser(response.user);
