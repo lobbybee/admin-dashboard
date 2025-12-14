@@ -105,7 +105,7 @@ const navigation = [
   { name: 'Dashboard', href: '/', icon: 'prime:home' },
   { name: 'Hotel Onboarding', href: '/hotel-onboarding', icon: 'prime:building' },
   { name: 'Staff Management', href: '/staff', icon: 'prime:users' },
-  // { name: 'Message Builder', href: '/flows', icon: 'prime:comments' },
+  { name: 'Message Templates', href: '/templates', icon: 'prime:comments' },
   { name: 'Payments', href: '/payments', icon: 'prime:credit-card' },
   {name:'Reports', href:'/reports', icon:'prime:chart-bar'}
 ];
@@ -157,7 +157,7 @@ const pageTitle = computed(() => {
     '/': 'Dashboard',
     '/hotel-onboarding': 'Hotel Onboarding',
     '/staff': 'Staff Management',
-    '/flows': 'Message Builder'
+    '/templates': 'Message Templates'
   };
   return titleMap[route.path] || 'Dashboard';
 });
