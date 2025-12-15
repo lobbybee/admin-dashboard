@@ -35,13 +35,13 @@
               <option value="90">Last 90 days</option>
               <option value="custom">Custom Range</option>
             </select>
-            <div class="w-4 h-4 flex items-center justify-center pointer-events-none">
+            <!-- <div class="w-4 h-4 flex items-center justify-center pointer-events-none">
               <div class="w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[5px] border-t-gray-400"></div>
-            </div>
+            </div> -->
           </div>
 
           <!-- Custom Date Range Picker -->
-          <div 
+          <div
             v-if="selectedDateRange === 'custom' && showCustomDatePicker"
             class="flex items-center gap-2 bg-white/95 backdrop-blur-sm px-3 py-2 rounded-lg border border-gray-200/60 shadow-sm"
           >
@@ -52,7 +52,7 @@
               placeholder="Select date range"
               class="w-full"
               dateFormat="mm/dd/yy"
-              showIcon
+               showIcon
             />
           </div>
         </div>

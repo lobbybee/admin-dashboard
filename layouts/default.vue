@@ -38,12 +38,12 @@
 
           <div class="flex items-center gap-2 sm:gap-4">
 
-            <Button text rounded aria-label="Notifications" class="text-gray-500 hover:text-gray-700 hover:bg-gray-100">
+            <!-- <Button text rounded aria-label="Notifications" class="text-gray-500 hover:text-gray-700 hover:bg-gray-100">
               <template #icon>
                 <Icon name="prime:bell" class="h-5 w-5" />
               </template>
               <Badge v-if="totalUnreadMessages > 0" :value="totalUnreadMessages" severity="danger" />
-            </Button>
+            </Button> -->
 
             <div class="relative">
               <Button @click="toggleUserMenu" text class="flex items-center gap-2 rounded-full p-1 text-left hover:bg-gray-100">
