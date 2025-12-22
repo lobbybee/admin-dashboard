@@ -61,7 +61,7 @@ export const useFetchHotelById = (id: Ref<string | undefined>) => {
   const { API } = useAPI();
 
   return useQuery<Hotel>({
-    key: ['hotels', id],
+    key: ['hotel', id],
     query: async () => {
       if (!id.value) return null;
       return API(`/admin/hotels/${id.value}/`);
@@ -216,7 +216,7 @@ export const useUpdateHotelDocument = () => {
             }
           });
         }
-      } 
+      }
       // If no documentId, use update-by-type endpoint (creates new or updates existing)
       else {
         if (data.document_file) {

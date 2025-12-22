@@ -20,7 +20,7 @@
 
       <HotelDetailsDialog
         v-model:visible="isDetailsDialogVisible"
-        :hotel="selectedHotel"
+        v-model="selectedHotel"
         @hotel-updated="refetch"
         class="w-full min-w-[350px] max-w-xl"
       />
@@ -41,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import type { DataTablePageEvent } from 'primevue/datatable';
 import Toast from 'primevue/toast';
@@ -66,7 +66,13 @@ const statusFilter = ref(route.query.status as string | null);
 const isDetailsDialogVisible = ref(false);
 const isCreateDialogVisible = ref(false);
 const isQRDialogVisible = ref(false);
-const selectedHotel = ref<Hotel | null>(null);
+const selectedHotelId = ref<string | null>(null);
+
+// Computed property that always finds the hotel by ID in the current data
+const selectedHotel = computed(() => {
+  if (!selectedHotelId.value || !data.value?.results) return null;
+  return data.value.results.find(hotel => hotel.id === selectedHotelId.value) || null;
+});
 
 const updateRoute = (query: Record<string, any>) => {
     const newQuery = { ...route.query, ...query };
@@ -83,12 +89,12 @@ const onPage = (event: DataTablePageEvent) => {
 };
 
 const onViewDetails = (hotel: Hotel) => {
-  selectedHotel.value = hotel;
+  selectedHotelId.value = hotel.id;
   isDetailsDialogVisible.value = true;
 };
 
 const onViewQR = (hotel: Hotel) => {
-  selectedHotel.value = hotel;
+  selectedHotelId.value = hotel.id;
   isQRDialogVisible.value = true;
 };
 

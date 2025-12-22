@@ -1,6 +1,6 @@
 <template>
     <Dialog
-        :visible="visible"
+        :visible="props.visible"
         @update:visible="$emit('update:visible', $event)"
         :header="`Hotel Details: ${hotel?.name}`"
         modal
@@ -81,7 +81,7 @@
                                         >
                                         <template v-if="isEditing">
                                             <InputText
-                                                v-model="hotelFormData.name"
+                                                v-model="editableFormData.name"
                                                 class="w-full"
                                                 placeholder="Enter hotel name"
                                             />
@@ -112,7 +112,7 @@
                                     >
                                     <template v-if="isEditing">
                                         <Textarea
-                                            v-model="hotelFormData.description"
+                                            v-model="editableFormData.description"
                                             rows="3"
                                             class="w-full"
                                             placeholder="Enter hotel description"
@@ -165,7 +165,7 @@
                                     >
                                     <template v-if="isEditing">
                                         <InputText
-                                            v-model="hotelFormData.address"
+                                            v-model="editableFormData.address"
                                             class="w-full"
                                             placeholder="Enter street address"
                                         />
@@ -187,7 +187,7 @@
                                     >
                                     <template v-if="isEditing">
                                         <InputText
-                                            v-model="hotelFormData.city"
+                                            v-model="editableFormData.city"
                                             class="w-full"
                                             placeholder="Enter city"
                                         />
@@ -208,7 +208,7 @@
                                     >
                                     <template v-if="isEditing">
                                         <InputText
-                                            v-model="hotelFormData.state"
+                                            v-model="editableFormData.state"
                                             class="w-full"
                                             placeholder="Enter state"
                                         />
@@ -228,7 +228,7 @@
                                     >
                                     <template v-if="isEditing">
                                         <InputText
-                                            v-model="hotelFormData.pincode"
+                                            v-model="editableFormData.pincode"
                                             class="w-full"
                                             placeholder="Enter pincode"
                                         />
@@ -247,7 +247,7 @@
                                     >
                                     <template v-if="isEditing">
                                         <InputText
-                                            v-model="hotelFormData.country"
+                                            v-model="editableFormData.country"
                                             class="w-full"
                                             placeholder="Enter country"
                                         />
@@ -271,7 +271,7 @@
                                                     >
                                                     <template v-if="isEditing">
                                                         <InputNumber
-                                                            v-model="hotelFormData.latitude"
+                                                            v-model="editableFormData.latitude"
                                                             class="max-w-sm"
                                                             placeholder="Enter latitude"
                                                             mode="decimal"
@@ -294,7 +294,7 @@
                                 >
                                 <template v-if="isEditing">
                                     <InputNumber
-                                        v-model="hotelFormData.longitude"
+                                        v-model="editableFormData.longitude"
                                         class="max-w-sm"
                                         placeholder="Enter longitude"
                                         mode="decimal"
@@ -343,7 +343,7 @@
                                     >
                                     <template v-if="isEditing">
                                         <InputText
-                                            v-model="hotelFormData.phone"
+                                            v-model="editableFormData.phone"
                                             class="w-full"
                                             placeholder="Enter phone number"
                                         />
@@ -363,7 +363,7 @@
                                     >
                                     <template v-if="isEditing">
                                         <InputText
-                                            v-model="hotelFormData.email"
+                                            v-model="editableFormData.email"
                                             class="w-full"
                                             placeholder="Enter email address"
                                         />
@@ -411,7 +411,7 @@
                                     <template v-if="isEditing">
                                         <InputText
                                             v-model="
-                                                hotelFormData.google_review_link
+                                                editableFormData.google_review_link
                                             "
                                             class="w-full"
                                             placeholder="Enter Google review link"
@@ -463,7 +463,7 @@
                                     <template v-if="isEditing">
                                         <DatePicker
                                             v-model="
-                                                hotelFormData.check_in_time
+                                                editableFormData.check_in_time
                                             "
                                             time-only
                                             hour-format="24"
@@ -491,7 +491,7 @@
                                     >
                                     <template v-if="isEditing">
                                         <Dropdown
-                                            v-model="hotelFormData.time_zone"
+                                            v-model="editableFormData.time_zone"
                                             :options="timezones"
                                             option-label="label"
                                             option-value="value"
@@ -1048,8 +1048,9 @@ import {
 } from "~/composables/useHotel";
 import type { UpdateHotelDocumentData } from "~/types/hotel";
 
+const hotel = defineModel<Hotel | null>({ required: true });
+
 const props = defineProps<{
-    hotel: Hotel | null;
     visible: boolean;
 }>();
 
@@ -1061,10 +1062,33 @@ const emit = defineEmits<{
 const toast = useToast();
 const verificationNotes = ref("");
 
+// Reactive form data that updates when hotel changes
+const hotelFormData = computed(() => ({
+    name: hotel.value?.name || "",
+    description: hotel.value?.description || "",
+    address: hotel.value?.address || "",
+    city: hotel.value?.city || "",
+    state: hotel.value?.state || "",
+    country: hotel.value?.country || "",
+    pincode: hotel.value?.pincode || "",
+    phone: hotel.value?.phone || "",
+    email: hotel.value?.email || "",
+    google_review_link: hotel.value?.google_review_link || "",
+    latitude: hotel.value?.latitude
+        ? parseFloat(hotel.value.latitude)
+        : null,
+    longitude: hotel.value?.longitude
+        ? parseFloat(hotel.value.longitude)
+        : null,
+    qr_code_url: hotel.value?.qr_code_url || "",
+    check_in_time: hotel.value?.check_in_time || "",
+    time_zone: hotel.value?.time_zone || "",
+}));
+
 // Edit mode states
 const isEditing = ref(false);
 const isSaving = ref(false);
-const hotelFormData = ref({
+const editableFormData = ref({
     name: "",
     description: "",
     address: "",
@@ -1082,6 +1106,21 @@ const hotelFormData = ref({
     time_zone: "",
 });
 
+// Watch for changes to hotel data and sync with editable form
+// watch(hotelFormData, (newData) => {
+//   console.log(newData)
+//     if (!isEditing.value) {
+//         editableFormData.value = { ...newData };
+//     }
+// }, { immediate: true, deep:true });
+
+// Watch for verification notes changes
+watch(() => hotel.value?.verification_notes, (notes) => {
+    if (notes) {
+        verificationNotes.value = notes;
+    }
+}, { immediate: true });
+
 const { verifyHotel, isLoading: verifyLoading } = useVerifyHotel();
 const { toggleHotelActive, isLoading: toggleActiveLoading } =
     useToggleHotelActive();
@@ -1090,37 +1129,7 @@ const { updateHotel, isLoading: updateLoading } = useUpdateHotel();
 const { updateHotelDocument, isLoading: documentUploadLoading } =
     useUpdateHotelDocument();
 
-watch(
-    () => props.hotel,
-    (newHotel) => {
-        if (newHotel) {
-            verificationNotes.value = newHotel.verification_notes || "";
 
-            // Populate form data when hotel changes
-            hotelFormData.value = {
-                name: newHotel.name || "",
-                description: newHotel.description || "",
-                address: newHotel.address || "",
-                city: newHotel.city || "",
-                state: newHotel.state || "",
-                country: newHotel.country || "",
-                pincode: newHotel.pincode || "",
-                phone: newHotel.phone || "",
-                email: newHotel.email || "",
-                google_review_link: newHotel.google_review_link || "",
-                latitude: newHotel.latitude
-                    ? parseFloat(newHotel.latitude)
-                    : null,
-                longitude: newHotel.longitude
-                    ? parseFloat(newHotel.longitude)
-                    : null,
-                qr_code_url: newHotel.qr_code_url || "",
-                check_in_time: newHotel.check_in_time || "",
-                time_zone: newHotel.time_zone || "",
-            };
-        }
-    },
-);
 
 const getStatusSeverity = (status: string) => {
     switch (status) {
@@ -1138,10 +1147,10 @@ const getStatusSeverity = (status: string) => {
 };
 
 const onVerifyHotel = async () => {
-    if (!props.hotel) return;
+    if (!hotel.value) return;
     try {
         await verifyHotel({
-            id: props.hotel.id,
+            id: hotel.value.id,
             data: { notes: verificationNotes.value },
         });
         toast.add({
@@ -1163,7 +1172,7 @@ const onVerifyHotel = async () => {
 };
 
 const onRejectHotel = async () => {
-    if (!props.hotel) return;
+    if (!hotel.value) return;
     if (!verificationNotes.value) {
         toast.add({
             severity: "warn",
@@ -1175,7 +1184,7 @@ const onRejectHotel = async () => {
     }
     try {
         await rejectHotel({
-            id: props.hotel.id,
+            id: hotel.value.id,
             data: { notes: verificationNotes.value },
         });
         toast.add({
@@ -1197,9 +1206,9 @@ const onRejectHotel = async () => {
 };
 
 const onToggleActive = async () => {
-    if (!props.hotel) return;
+    if (!hotel.value) return;
     try {
-        const response = await toggleHotelActive(props.hotel.id);
+        const response = await toggleHotelActive(hotel.value.id);
         toast.add({
             severity: "success",
             summary: "Success",
@@ -1268,7 +1277,7 @@ const onDocumentFileSelect = (event: any) => {
 };
 
 const onDocumentUpload = async () => {
-    if (!props.hotel || !selectedDocumentFile.value || !documentType.value)
+    if (!hotel.value || !selectedDocumentFile.value || !documentType.value)
         return;
 
     try {
@@ -1282,7 +1291,7 @@ const onDocumentUpload = async () => {
 
         // Use the new smart composable - no documentId means use update-by-type endpoint
         await updateHotelDocument({
-            hotelId: props.hotel.id,
+            hotelId: hotel.value.id,
             data: documentData,
         });
 
@@ -1328,47 +1337,26 @@ const toggleUploadForm = () => {
 // Hotel update functions
 const startEditing = () => {
     isEditing.value = true;
+    editableFormData.value = { ...hotelFormData.value };
 };
 
 const cancelEditing = () => {
     isEditing.value = false;
-    // Reset form data to original hotel values
-    if (props.hotel) {
-        hotelFormData.value = {
-            name: props.hotel.name || "",
-            description: props.hotel.description || "",
-            address: props.hotel.address || "",
-            city: props.hotel.city || "",
-            state: props.hotel.state || "",
-            country: props.hotel.country || "",
-            pincode: props.hotel.pincode || "",
-            phone: props.hotel.phone || "",
-            email: props.hotel.email || "",
-            google_review_link: props.hotel.google_review_link || "",
-            latitude: props.hotel.latitude
-                ? parseFloat(props.hotel.latitude)
-                : null,
-            longitude: props.hotel.longitude
-                ? parseFloat(props.hotel.longitude)
-                : null,
-            qr_code_url: props.hotel.qr_code_url || "",
-            check_in_time: props.hotel.check_in_time || "",
-            time_zone: props.hotel.time_zone || "",
-        };
-    }
+    // Reset editable form data to original hotel values
+    editableFormData.value = { ...hotelFormData.value };
 };
 
 const saveHotelDetails = async () => {
-    if (!props.hotel) return;
+    if (!hotel.value) return;
 
     try {
         isSaving.value = true;
 
         // Only include non-empty fields in the update
         const updateData: any = {};
-        Object.keys(hotelFormData.value).forEach((key) => {
+        Object.keys(editableFormData.value).forEach((key) => {
             const value =
-                hotelFormData.value[key as keyof typeof hotelFormData.value];
+                editableFormData.value[key as keyof typeof editableFormData.value];
 
             // Format time value to ensure it's in HH:MM format
             if (key === 'check_in_time' && value) {
@@ -1397,7 +1385,7 @@ const saveHotelDetails = async () => {
         });
 
         await updateHotel({
-            id: props.hotel.id,
+            id: hotel.value.id,
             data: updateData,
         });
 
