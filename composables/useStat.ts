@@ -1,5 +1,6 @@
 import { computed, type Ref } from 'vue';
 import { useAPI } from './useAPI';
+import { useAPIHelper } from './useAPIHelper';
 
 // --------------------------------------------------------------------------------
 // Type Definitions
@@ -134,20 +135,22 @@ export interface StatParams {
  */
 export const useFetchOverviewStats = (params?: Ref<StatParams>) => {
   const { API } = useAPI();
+  const { getData } = useAPIHelper();
 
   return useQuery<OverviewResponse>({
     key: () => ['stats', 'overview', params?.value],
     query: async () => {
       const queryParams = params?.value || {};
-      
+
       // Clean up undefined values
-      Object.keys(queryParams).forEach(key => 
+      Object.keys(queryParams).forEach(key =>
         (queryParams[key] === undefined || queryParams[key] === null) && delete queryParams[key]
       );
 
-      return API('/admin_stat/overview/', {
+      const response = await API('/admin_stat/overview/', {
         params: queryParams,
       });
+      return getData<OverviewResponse>(response);
     },
   });
 };
@@ -157,20 +160,22 @@ export const useFetchOverviewStats = (params?: Ref<StatParams>) => {
  */
 export const useFetchHotelStats = (params?: Ref<StatParams>) => {
   const { API } = useAPI();
+  const { getData } = useAPIHelper();
 
   return useQuery<HotelStatsResponse>({
     key: () => ['stats', 'hotels', params?.value],
     query: async () => {
       const queryParams = params?.value || {};
-      
+
       // Clean up undefined values
-      Object.keys(queryParams).forEach(key => 
+      Object.keys(queryParams).forEach(key =>
         (queryParams[key] === undefined || queryParams[key] === null) && delete queryParams[key]
       );
 
-      return API('/admin_stat/hotels/', {
+      const response = await API('/admin_stat/hotels/', {
         params: queryParams,
       });
+      return getData<HotelStatsResponse>(response);
     },
   });
 };
@@ -180,20 +185,22 @@ export const useFetchHotelStats = (params?: Ref<StatParams>) => {
  */
 export const useFetchConversationStats = (params?: Ref<StatParams>) => {
   const { API } = useAPI();
+  const { getData } = useAPIHelper();
 
   return useQuery<ConversationStatsResponse>({
     key: () => ['stats', 'conversations', params?.value],
     query: async () => {
       const queryParams = params?.value || {};
-      
+
       // Clean up undefined values
-      Object.keys(queryParams).forEach(key => 
+      Object.keys(queryParams).forEach(key =>
         (queryParams[key] === undefined || queryParams[key] === null) && delete queryParams[key]
       );
 
-      return API('/admin_stat/conversations/', {
+      const response = await API('/admin_stat/conversations/', {
         params: queryParams,
       });
+      return getData<ConversationStatsResponse>(response);
     },
   });
 };
@@ -203,20 +210,22 @@ export const useFetchConversationStats = (params?: Ref<StatParams>) => {
  */
 export const useFetchPaymentStats = (params?: Ref<StatParams>) => {
   const { API } = useAPI();
+  const { getData } = useAPIHelper();
 
   return useQuery<PaymentStatsResponse>({
     key: () => ['stats', 'payments', params?.value],
     query: async () => {
       const queryParams = params?.value || {};
-      
+
       // Clean up undefined values
-      Object.keys(queryParams).forEach(key => 
+      Object.keys(queryParams).forEach(key =>
         (queryParams[key] === undefined || queryParams[key] === null) && delete queryParams[key]
       );
 
-      return API('/admin_stat/payments/', {
+      const response = await API('/admin_stat/payments/', {
         params: queryParams,
       });
+      return getData<PaymentStatsResponse>(response);
     },
   });
 };

@@ -72,14 +72,14 @@
     <!-- Results Count -->
     <div class="text-sm text-gray-600 mb-6">
       <p>
-        Showing {{ templatesData.results.length }} of {{ templatesData.count }} templates
+        Showing {{ templatesData?.results?.length || 0 }} of {{ templatesData?.count || 0 }} templates
       </p>
     </div>
 
     <!-- Templates Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <div
-        v-for="template in templatesData.results"
+        v-for="template in templatesData?.results"
         :key="template.id"
         class="card hover:shadow-lg transition-all duration-200"
       >
@@ -168,7 +168,7 @@
 
     <!-- Empty State -->
     <div
-      v-if="templatesData.results.length === 0"
+      v-if="templatesData?.results?.length === 0"
       class="text-center py-12"
     >
       <div class="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
@@ -407,9 +407,11 @@ import {
   useUpdateTemplate, 
   useFetchTemplateVariables,
   useManualTemplatePreview,
-  type Template,
-  type TemplateUpdateRequest
 } from '~/composables/useTemplates';
+import type {
+  Template,
+  TemplateUpdateRequest
+} from '~/types/templates';
 
 // Page metadata
 definePageMeta({

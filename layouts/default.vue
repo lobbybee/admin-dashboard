@@ -62,11 +62,11 @@
                 <template #item="{ item, props }">
                   <div v-if="item.separator" class="my-1 border-t border-gray-200" />
                   <NuxtLink v-else-if="item.route" :to="item.route" class="flex cursor-pointer items-center rounded-md p-2 hover:bg-gray-50 text-gray-700" v-bind="props.action">
-                    <Icon :name="item.icon" class="mr-2 h-5 w-5 text-gray-500" />
+                    <Icon v-if="item.icon" :name="item.icon" class="mr-2 h-5 w-5 text-gray-500" />
                     <span class="text-sm">{{ item.label }}</span>
                   </NuxtLink>
-                  <a v-else @click="item.command" class="flex cursor-pointer items-center rounded-md p-2 hover:bg-gray-50 text-gray-700" v-bind="props.action">
-                    <Icon :name="item.icon" class="mr-2 h-5 w-5 text-gray-500" />
+                  <a v-else @click="(e) => item.command && item.command({ originalEvent: e, item })" class="flex cursor-pointer items-center rounded-md p-2 hover:bg-gray-50 text-gray-700" v-bind="props.action">
+                    <Icon v-if="item.icon" :name="item.icon" class="mr-2 h-5 w-5 text-gray-500" />
                     <span class="text-sm">{{ item.label }}</span>
                   </a>
                 </template>
@@ -84,20 +84,20 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { useAPI } from '~/composables/useAPI';
 import { useAuthStore } from '~/stores/auth';
+import type { MenuItem } from 'primevue/menuitem';
 
 const router = useRouter();
 const route = useRoute();
 const { logout } = useAPI();
 const authStore = useAuthStore();
-const { user, isAuthenticated, userRole, userInitials } = storeToRefs(authStore);
+const { user, isAuthenticated, userInitials, userRole } = storeToRefs(authStore);
 
-const userMenu = ref(null);
+const userMenu = ref();
 
-const hotel = ref({ name: 'Loading...' });
 const totalUnreadMessages = ref(0); // Mocked for now
 const sidebarVisible = ref(false);
 
@@ -107,19 +107,8 @@ const navigation = [
   { name: 'Staff Management', href: '/staff', icon: 'prime:users' },
   { name: 'Message Templates', href: '/templates', icon: 'prime:comments' },
   { name: 'Payments', href: '/payments', icon: 'prime:credit-card' },
-  {name:'Reports', href:'/reports', icon:'prime:chart-bar'}
+  { name:'Reports', href:'/reports', icon:'prime:chart-bar'}
 ];
-
-// Fetch hotel data will be triggered automatically by useQuery
-// when user.value.hotel_id becomes available.
-// const { HotelData, HotelIsLoading, HotelError } = useFetchHotel(computed(() => user.value?.hotel_id));
-const HotelData = ref(null);
-
-watch(HotelData, (newHotel) => {
-  if (newHotel) {
-    hotel.value = newHotel;
-  }
-});
 
 // Redirect to login if not authenticated
 watch(isAuthenticated, (isAuth) => {
@@ -128,7 +117,7 @@ watch(isAuthenticated, (isAuth) => {
   }
 }, { immediate: true });
 
-const userMenuItems = ref([
+const userMenuItems = ref<MenuItem[]>([
   {
     separator: true
   },
@@ -139,8 +128,8 @@ const userMenuItems = ref([
   }
 ]);
 
-const toggleUserMenu = (event) => {
-  userMenu.value.toggle(event);
+const toggleUserMenu = (event: Event) => {
+  userMenu.value?.toggle(event);
 };
 
 const handleLogout = async () => {
@@ -153,11 +142,13 @@ const handleLogout = async () => {
 };
 
 const pageTitle = computed(() => {
-  const titleMap = {
+  const titleMap: Record<string, string> = {
     '/': 'Dashboard',
     '/hotel-onboarding': 'Hotel Onboarding',
     '/staff': 'Staff Management',
-    '/templates': 'Message Templates'
+    '/templates': 'Message Templates',
+    '/payments': 'Payments',
+    '/reports': 'Reports'
   };
   return titleMap[route.path] || 'Dashboard';
 });

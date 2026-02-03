@@ -42,17 +42,17 @@
                 v-model="formData.username"
                 type="text"
                 :disabled="isEdit"
-                :class="{ 'p-invalid': errors.username }"
-                :aria-invalid="errors.username ? 'true' : 'false'"
-                :aria-describedby="errors.username ? 'username-error' : 'username-help'"
+                :class="{ 'p-invalid': errors?.username }"
+                :aria-invalid="errors?.username ? 'true' : 'false'"
+                :aria-describedby="errors?.username ? 'username-error' : 'username-help'"
                 placeholder="Enter username"
                 class="w-full"
               />
-              <small v-if="!errors.username" id="username-help" class="text-gray-500 text-xs block">
+              <small v-if="!errors?.username" id="username-help" class="text-gray-500 text-xs block">
                 Unique identifier for the staff member
               </small>
-              <small v-if="errors.username" id="username-error" class="p-error text-sm mt-1 block" role="alert">
-                {{ errors.username }}
+              <small v-if="errors?.username" id="username-error" class="p-error text-sm mt-1 block" role="alert">
+                {{ errors.username._errors[0] }}
               </small>
             </div>
 
@@ -65,17 +65,17 @@
                 id="email"
                 v-model="formData.email"
                 type="email"
-                :class="{ 'p-invalid': errors.email }"
-                :aria-invalid="errors.email ? 'true' : 'false'"
-                :aria-describedby="errors.email ? 'email-error' : 'email-help'"
+                :class="{ 'p-invalid': errors?.email }"
+                :aria-invalid="errors?.email ? 'true' : 'false'"
+                :aria-describedby="errors?.email ? 'email-error' : 'email-help'"
                 placeholder="staff@example.com"
                 class="w-full"
               />
-              <small v-if="!errors.email" id="email-help" class="text-gray-500 text-xs block">
+              <small v-if="!errors?.email" id="email-help" class="text-gray-500 text-xs block">
                 Staff member's professional email address
               </small>
-              <small v-if="errors.email" id="email-error" class="p-error text-sm mt-1 block" role="alert">
-                {{ errors.email }}
+              <small v-if="errors?.email" id="email-error" class="p-error text-sm mt-1 block" role="alert">
+                {{ errors.email._errors[0] }}
               </small>
             </div>
           </div>
@@ -99,19 +99,19 @@
               <Password
                 id="password"
                 v-model="formData.password"
-                :class="{ 'p-invalid': errors.password }"
-                :aria-invalid="errors.password ? 'true' : 'false'"
-                :aria-describedby="errors.password ? 'password-error' : 'password-help'"
+                :class="{ 'p-invalid': errors?.password }"
+                :aria-invalid="errors?.password ? 'true' : 'false'"
+                :aria-describedby="errors?.password ? 'password-error' : 'password-help'"
                 placeholder="Enter secure password"
                 toggle-mask
                 :feedback="false"
                 class="w-full"
               />
-              <small v-if="!errors.password" id="password-help" class="text-gray-500 text-xs block">
+              <small v-if="!errors?.password" id="password-help" class="text-gray-500 text-xs block">
                 Minimum 8 characters with a mix of letters and numbers
               </small>
-              <small v-if="errors.password" id="password-error" class="p-error text-sm mt-1 block" role="alert">
-                {{ errors.password }}
+              <small v-if="errors?.password" id="password-error" class="p-error text-sm mt-1 block" role="alert">
+                {{ errors.password._errors[0] }}
               </small>
             </div>
 
@@ -123,19 +123,19 @@
               <Password
                 id="confirmPassword"
                 v-model="formData.confirmPassword"
-                :class="{ 'p-invalid': errors.confirmPassword }"
-                :aria-invalid="errors.confirmPassword ? 'true' : 'false'"
-                :aria-describedby="errors.confirmPassword ? 'confirm-password-error' : 'confirm-password-help'"
+                :class="{ 'p-invalid': errors?.confirmPassword }"
+                :aria-invalid="errors?.confirmPassword ? 'true' : 'false'"
+                :aria-describedby="errors?.confirmPassword ? 'confirm-password-error' : 'confirm-password-help'"
                 placeholder="Re-enter password"
                 toggle-mask
                 :feedback="false"
                 class="w-full"
               />
-              <small v-if="!errors.confirmPassword" id="confirm-password-help" class="text-gray-500 text-xs block">
+              <small v-if="!errors?.confirmPassword" id="confirm-password-help" class="text-gray-500 text-xs block">
                 Re-enter the password to confirm
               </small>
-              <small v-if="errors.confirmPassword" id="confirm-password-error" class="p-error text-sm mt-1 block" role="alert">
-                {{ errors.confirmPassword }}
+              <small v-if="errors?.confirmPassword" id="confirm-password-error" class="p-error text-sm mt-1 block" role="alert">
+                {{ errors.confirmPassword._errors[0] }}
               </small>
             </div>
           </div>
@@ -163,16 +163,16 @@
                 option-label="label"
                 option-value="value"
                 placeholder="Select a role"
-                :class="{ 'p-invalid': errors.user_type }"
-                :aria-invalid="errors.user_type ? 'true' : 'false'"
-                :aria-describedby="errors.user_type ? 'user-type-error' : 'user-type-help'"
+                :class="{ 'p-invalid': errors?.user_type }"
+                :aria-invalid="errors?.user_type ? 'true' : 'false'"
+                :aria-describedby="errors?.user_type ? 'user-type-error' : 'user-type-help'"
                 class="w-full"
               />
-              <small v-if="!errors.user_type" id="user-type-help" class="text-gray-500 text-xs block">
+              <small v-if="!errors?.user_type" id="user-type-help" class="text-gray-500 text-xs block">
                 Determines system permissions and access level
               </small>
-              <small v-if="errors.user_type" id="user-type-error" class="p-error text-sm mt-1 block" role="alert">
-                {{ errors.user_type }}
+              <small v-if="errors?.user_type" id="user-type-error" class="p-error text-sm mt-1 block" role="alert">
+                {{ errors.user_type._errors[0] }}
               </small>
             </div>
 
@@ -185,17 +185,17 @@
                 id="phone"
                 v-model="formData.phone_number"
                 type="tel"
-                :class="{ 'p-invalid': errors.phone_number }"
-                :aria-invalid="errors.phone_number ? 'true' : 'false'"
-                :aria-describedby="errors.phone_number ? 'phone-error' : 'phone-help'"
+                :class="{ 'p-invalid': errors?.phone_number }"
+                :aria-invalid="errors?.phone_number ? 'true' : 'false'"
+                :aria-describedby="errors?.phone_number ? 'phone-error' : 'phone-help'"
                 placeholder="+1 (555) 123-4567"
                 class="w-full"
               />
-              <small v-if="!errors.phone_number" id="phone-help" class="text-gray-500 text-xs block">
+              <small v-if="!errors?.phone_number" id="phone-help" class="text-gray-500 text-xs block">
                 Optional contact number for the staff member
               </small>
-              <small v-if="errors.phone_number" id="phone-error" class="p-error text-sm mt-1 block" role="alert">
-                {{ errors.phone_number }}
+              <small v-if="errors?.phone_number" id="phone-error" class="p-error text-sm mt-1 block" role="alert">
+                {{ errors.phone_number._errors[0] }}
               </small>
             </div>
           </div>
@@ -227,6 +227,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
+import { z } from 'zod';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
@@ -253,17 +254,17 @@ const formData = ref({
   email: '',
   password: '',
   confirmPassword: '',
-  user_type: 'platform_staff',
+  user_type: 'platform_staff' as 'platform_admin' | 'platform_staff',
   phone_number: ''
 });
 
-const errors = ref<Record<string, string>>({});
+const errors = ref<z.ZodFormattedError<any> | null>(null);
 
 // Define user type options as a constant to avoid reactivity issues
 const userTypeOptions = [
   { label: 'Platform Admin', value: 'platform_admin' },
   { label: 'Platform Staff', value: 'platform_staff' }
-] as const;
+];
 
 // Reset form when user changes
 watch(() => props.user, (newUser) => {
@@ -273,7 +274,7 @@ watch(() => props.user, (newUser) => {
       email: newUser.email || '',
       password: '',
       confirmPassword: '',
-      user_type: newUser.user_type || 'platform_staff',
+      user_type: (newUser.user_type as 'platform_staff' | 'platform_admin') || 'platform_staff',
       phone_number: newUser.phone_number || ''
     };
   } else {
@@ -286,66 +287,82 @@ watch(() => props.user, (newUser) => {
       phone_number: ''
     };
   }
-  errors.value = {};
+  errors.value = null;
 }, { immediate: true });
 
-const validateForm = () => {
-  errors.value = {};
+// Zod Schemas
+const baseSchema = z.object({
+  username: z.string().min(1, 'Username is required'),
+  email: z.string().email('Invalid email address'),
+  user_type: z.enum(['platform_admin', 'platform_staff']),
+  phone_number: z.string().optional(),
+});
 
-  if (!formData.value.username.trim()) {
-    errors.value.username = 'Username is required';
+const createSchema = baseSchema.extend({
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  confirmPassword: z.string()
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"]
+});
+
+const updateSchema = baseSchema.extend({
+  password: z.string().optional(),
+  confirmPassword: z.string().optional()
+}).refine((data) => {
+  if (data.password && data.password.length > 0) {
+    return data.password.length >= 8;
   }
-
-  if (!formData.value.email.trim()) {
-    errors.value.email = 'Email is required';
-  } else if (!/^\S+@\S+\.\S+$/.test(formData.value.email)) {
-    errors.value.email = 'Invalid email format';
+  return true;
+}, {
+  message: "Password must be at least 8 characters",
+  path: ["password"]
+}).refine((data) => {
+  if (data.password && data.password !== data.confirmPassword) {
+    return false;
   }
-
-  if (!isEdit.value) {
-    if (!formData.value.password) {
-      errors.value.password = 'Password is required';
-    } else if (formData.value.password.length < 8) {
-      errors.value.password = 'Password must be at least 8 characters';
-    }
-
-    if (formData.value.password !== formData.value.confirmPassword) {
-      errors.value.confirmPassword = 'Passwords do not match';
-    }
-  }
-
-  if (!formData.value.user_type) {
-    errors.value.user_type = 'User type is required';
-  }
-
-  return Object.keys(errors.value).length === 0;
-};
+  return true;
+}, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"]
+});
 
 const handleSubmit = () => {
-  if (!validateForm()) return;
+  const schema = isEdit.value ? updateSchema : createSchema;
+  const result = schema.safeParse(formData.value);
+
+  if (!result.success) {
+    errors.value = result.error.format();
+    return;
+  }
+
+  errors.value = null;
 
   if (isEdit.value && props.user) {
     // For edit, we don't send password unless it's being changed
     const updateData: StaffUserUpdateRequest = {
-      username: formData.value.username,
-      email: formData.value.email,
-      user_type: formData.value.user_type,
-      phone_number: formData.value.phone_number || undefined
+      username: result.data.username,
+      email: result.data.email,
+      user_type: result.data.user_type,
+      phone_number: result.data.phone_number || undefined
     };
 
     // Only include password if it's being changed
-    if (formData.value.password) {
-      updateData.password = formData.value.password;
+    if (result.data.password && result.data.password.length > 0) {
+      updateData.password = result.data.password;
     }
 
     emit('save', updateData, true, props.user.id.toString());
   } else {
+    // For create, strict typing based on createSchema output
+    // We strictly know password is created
+    const data = result.data as z.infer<typeof createSchema>;
     const createData: StaffUserCreateRequest = {
-      username: formData.value.username,
-      email: formData.value.email,
-      password: formData.value.password,
-      user_type: formData.value.user_type,
-      phone_number: formData.value.phone_number || undefined
+      username: data.username,
+      email: data.email,
+      password: data.password,
+      user_type: data.user_type,
+      phone_number: data.phone_number || undefined
     };
 
     emit('save', createData, false);

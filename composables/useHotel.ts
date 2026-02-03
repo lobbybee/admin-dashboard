@@ -1,5 +1,6 @@
 import { computed, type Ref } from 'vue';
 import { useAPI } from './useAPI';
+import { useAPIHelper } from './useAPIHelper';
 import { useRoute } from 'vue-router';
 import type { PaginatedHotels, ListHotelsParams, Hotel, VerifyHotelData, RejectHotelData, CreateHotelData, UpdateHotelData, UpdateHotelDocumentData } from '~/types/hotel';
 
@@ -14,6 +15,7 @@ import type { PaginatedHotels, ListHotelsParams, Hotel, VerifyHotelData, RejectH
 export const useFetchHotels = () => {
   const route = useRoute();
   const { API } = useAPI();
+  const { getPaginatedResponse } = useAPIHelper();
 
   // Create a computed that will react to route changes
   const queryParams = computed(() => {
@@ -46,9 +48,10 @@ export const useFetchHotels = () => {
       // Clean up undefined values
       Object.keys(params).forEach(key => (params[key] === undefined || params[key] === null) && delete params[key]);
 
-      return API('/admin/hotels/', {
+      const response = await API('/admin/hotels/', {
         params,
       });
+      return getPaginatedResponse<PaginatedHotels['results'][0]>(response);
     },
     placeholderData: (previousData) => previousData,
   });
@@ -59,12 +62,14 @@ export const useFetchHotels = () => {
  */
 export const useFetchHotelById = (id: Ref<string | undefined>) => {
   const { API } = useAPI();
+  const { getData } = useAPIHelper();
 
   return useQuery<Hotel>({
     key: ['hotel', id],
     query: async () => {
       if (!id.value) return null;
-      return API(`/admin/hotels/${id.value}/`);
+      const response = await API(`/admin/hotels/${id.value}/`);
+      return getData<Hotel>(response);
     },
     enabled: computed(() => !!id.value)
   });
@@ -75,13 +80,15 @@ export const useFetchHotelById = (id: Ref<string | undefined>) => {
  */
 export const useVerifyHotel = () => {
   const { API } = useAPI();
+  const { getData } = useAPIHelper();
 
   const mutationResult = useMutation({
     mutation: async ({ id, data }: { id: string; data: VerifyHotelData }) => {
-      return API(`/admin/hotels/${id}/verify/`, {
+      const response = await API(`/admin/hotels/${id}/verify/`, {
         method: 'POST',
         body: data
       });
+      return getData<any>(response);
     }
   });
 
@@ -98,13 +105,15 @@ export const useVerifyHotel = () => {
  */
 export const useRejectHotel = () => {
   const { API } = useAPI();
+  const { getData } = useAPIHelper();
 
   const mutationResult = useMutation({
     mutation: async ({ id, data }: { id: string; data: RejectHotelData }) => {
-      return API(`/admin/hotels/${id}/reject/`, {
+      const response = await API(`/admin/hotels/${id}/reject/`, {
         method: 'POST',
         body: data
       });
+      return getData<any>(response);
     }
   });
 
@@ -121,12 +130,14 @@ export const useRejectHotel = () => {
  */
 export const useToggleHotelActive = () => {
   const { API } = useAPI();
+  const { getData } = useAPIHelper();
 
   const mutationResult = useMutation({
     mutation: async (id: string) => {
-      return API(`/admin/hotels/${id}/toggle-active/`, {
+      const response = await API(`/admin/hotels/${id}/toggle-active/`, {
         method: 'POST'
       });
+      return getData<any>(response);
     }
   });
 
@@ -143,13 +154,15 @@ export const useToggleHotelActive = () => {
  */
 export const useCreateHotel = () => {
   const { API } = useAPI();
+  const { getData } = useAPIHelper();
 
   const mutationResult = useMutation({
     mutation: async (data: CreateHotelData) => {
-      return API('/admin/create-hotel/', {
+      const response = await API('/admin/create-hotel/', {
         method: 'POST',
         body: data
       });
+      return getData<any>(response);
     }
   });
 
@@ -166,13 +179,15 @@ export const useCreateHotel = () => {
  */
 export const useUpdateHotel = () => {
   const { API } = useAPI();
+  const { getData } = useAPIHelper();
 
   const mutationResult = useMutation({
     mutation: async ({ id, data }: { id: string; data: UpdateHotelData }) => {
-      return API(`/admin/hotels/${id}/`, {
+      const response = await API(`/admin/hotels/${id}/`, {
         method: 'PATCH',
         body: data
       });
+      return getData<any>(response);
     }
   });
 
@@ -191,6 +206,7 @@ export const useUpdateHotel = () => {
  */
 export const useUpdateHotelDocument = () => {
   const { API } = useAPI();
+  const { getData } = useAPIHelper();
 
   const mutationResult = useMutation({
     mutation: async ({ hotelId, documentId, data }: { hotelId: string; documentId?: string; data: UpdateHotelDocumentData }) => {
@@ -201,20 +217,22 @@ export const useUpdateHotelDocument = () => {
           formData.append('document_type', data.document_type);
           formData.append('document_file', data.document_file);
 
-          return API(`/admin/hotels/${hotelId}/documents/${documentId}/`, {
+          const response = await API(`/admin/hotels/${hotelId}/documents/${documentId}/`, {
             method: 'PATCH',
             body: formData,
             headers: {
               'Content-Type': 'multipart/form-data'
             }
           });
+          return getData<any>(response);
         } else {
-          return API(`/admin/hotels/${hotelId}/documents/${documentId}/`, {
+          const response = await API(`/admin/hotels/${hotelId}/documents/${documentId}/`, {
             method: 'PATCH',
             body: {
               document_type: data.document_type
             }
           });
+          return getData<any>(response);
         }
       }
       // If no documentId, use update-by-type endpoint (creates new or updates existing)
@@ -224,20 +242,22 @@ export const useUpdateHotelDocument = () => {
           formData.append('document_type', data.document_type);
           formData.append('document_file', data.document_file);
 
-          return API(`/admin/hotels/${hotelId}/documents/update-by-type/`, {
+          const response = await API(`/admin/hotels/${hotelId}/documents/update-by-type/`, {
             method: 'PATCH',
             body: formData,
             headers: {
               'Content-Type': 'multipart/form-data'
             }
           });
+          return getData<any>(response);
         } else {
-          return API(`/admin/hotels/${hotelId}/documents/update-by-type/`, {
+          const response = await API(`/admin/hotels/${hotelId}/documents/update-by-type/`, {
             method: 'PATCH',
             body: {
               document_type: data.document_type
             }
           });
+          return getData<any>(response);
         }
       }
     }

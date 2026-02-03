@@ -1,5 +1,6 @@
 import { computed, type Ref } from 'vue';
 import { useAPI } from './useAPI';
+import { useAPIHelper } from './useAPIHelper';
 import { useRoute } from 'vue-router';
 import type { PaginatedFlags, ListFlagsParams, Flag, FlagCreateRequest, FlagResetRequest, GuestFlagCheck, GuestSearchResponse, SearchGuestsParams } from '~/types/flags';
 
@@ -14,6 +15,7 @@ import type { PaginatedFlags, ListFlagsParams, Flag, FlagCreateRequest, FlagRese
 export const useFetchFlags = () => {
   const route = useRoute();
   const { API } = useAPI();
+  const { getPaginatedResponse } = useAPIHelper();
 
   // Create a computed that will react to route changes
   const queryParams = computed(() => {
@@ -44,9 +46,10 @@ export const useFetchFlags = () => {
       // Clean up undefined values
       Object.keys(params).forEach(key => (params[key] === undefined || params[key] === null) && delete params[key]);
 
-      return API('/flags/', {
+      const response = await API('/flags/', {
         params,
       });
+      return getPaginatedResponse<PaginatedFlags['results'][0]>(response);
     },
     placeholderData: (previousData) => previousData,
   });
@@ -57,12 +60,14 @@ export const useFetchFlags = () => {
  */
 export const useFetchFlagById = (id: Ref<string | undefined>) => {
   const { API } = useAPI();
+  const { getData } = useAPIHelper();
 
   return useQuery<Flag>({
     key: ['flags', id],
     query: async () => {
       if (!id.value) return null;
-      return API(`/flags/${id.value}/`);
+      const response = await API(`/flags/${id.value}/`);
+      return getData<Flag>(response);
     },
     enabled: computed(() => !!id.value)
   });
@@ -73,12 +78,14 @@ export const useFetchFlagById = (id: Ref<string | undefined>) => {
  */
 export const useCheckGuestFlags = (guestId: Ref<number | undefined>) => {
   const { API } = useAPI();
+  const { getData } = useAPIHelper();
 
   return useQuery<GuestFlagCheck>({
     key: ['guest-flags-check', guestId],
     query: async () => {
       if (!guestId.value) return null;
-      return API(`/admin/flags/check/${guestId.value}/`);
+      const response = await API(`/admin/flags/check/${guestId.value}/`);
+      return getData<GuestFlagCheck>(response);
     },
     enabled: computed(() => !!guestId.value)
   });
@@ -89,13 +96,15 @@ export const useCheckGuestFlags = (guestId: Ref<number | undefined>) => {
  */
 export const useCreateFlag = () => {
   const { API } = useAPI();
+  const { getData } = useAPIHelper();
 
   const mutationResult = useMutation({
     mutation: async (data: FlagCreateRequest) => {
-      return API('/flags/', {
+      const response = await API('/flags/', {
         method: 'POST',
         body: data
       });
+      return getData<any>(response);
     }
   });
 
@@ -112,13 +121,15 @@ export const useCreateFlag = () => {
  */
 export const useResetFlag = () => {
   const { API } = useAPI();
+  const { getData } = useAPIHelper();
 
   const mutationResult = useMutation({
     mutation: async ({ id, data }: { id: string; data: FlagResetRequest }) => {
-      return API(`/flags/${id}/reset/`, {
+      const response = await API(`/flags/${id}/reset/`, {
         method: 'POST',
         body: data
       });
+      return getData<any>(response);
     }
   });
 
@@ -135,6 +146,7 @@ export const useResetFlag = () => {
  */
 export const useSearchGuests = (query: Ref<string | undefined>, limit: Ref<number | undefined> = undefined) => {
   const { API } = useAPI();
+  const { getData } = useAPIHelper();
 
   return useQuery<GuestSearchResponse>({
     key: ['guest-search', query, limit],
@@ -149,9 +161,10 @@ export const useSearchGuests = (query: Ref<string | undefined>, limit: Ref<numbe
       // Clean up undefined values
       Object.keys(params).forEach(key => (params[key] === undefined || params[key] === null) && delete params[key]);
 
-      return API('/search-guests/', {
+      const response = await API('/search-guests/', {
         params,
       });
+      return getData<GuestSearchResponse>(response);
     },
     enabled: computed(() => !!query.value && query.value.trim() !== '')
   });

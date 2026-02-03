@@ -1,5 +1,6 @@
 import { computed, type Ref } from 'vue';
 import { useAPI } from './useAPI';
+import { useAPIHelper } from './useAPIHelper';
 import { useRoute } from 'vue-router';
 import type {
   PaginatedSubscriptionPlans,
@@ -31,6 +32,7 @@ import type {
 export const useFetchSubscriptionPlans = () => {
   const route = useRoute();
   const { API } = useAPI();
+  const { getPaginatedResponse } = useAPIHelper();
 
   // Create a computed that will react to route changes
   const queryParams = computed(() => {
@@ -57,9 +59,10 @@ export const useFetchSubscriptionPlans = () => {
       // Clean up undefined values
       Object.keys(params).forEach(key => (params[key] === undefined || params[key] === null) && delete params[key]);
 
-      return API('/plans/', {
+      const response = await API('/plans/', {
         params,
       });
+      return getPaginatedResponse<PaginatedSubscriptionPlans['results'][0]>(response);
     },
     placeholderData: (previousData) => previousData,
   });
@@ -70,12 +73,14 @@ export const useFetchSubscriptionPlans = () => {
  */
 export const useFetchSubscriptionPlanById = (id: Ref<string | undefined>) => {
   const { API } = useAPI();
+  const { getData } = useAPIHelper();
 
   return useQuery<SubscriptionPlan>({
     key: ['subscription-plans', id],
     query: async () => {
       if (!id.value) return null;
-      return API('/plans/${id.value}/');
+      const response = await API(`/plans/${id.value}/`);
+      return getData<SubscriptionPlan>(response);
     },
     enabled: computed(() => !!id.value)
   });
@@ -86,13 +91,15 @@ export const useFetchSubscriptionPlanById = (id: Ref<string | undefined>) => {
  */
 export const useCreateSubscriptionPlan = () => {
   const { API } = useAPI();
+  const { getData } = useAPIHelper();
 
   const mutationResult = useMutation({
     mutation: async (data: SubscriptionPlanCreateRequest) => {
-      return API('/plans/', {
+      const response = await API('/plans/', {
         method: 'POST',
         body: data
       });
+      return getData<any>(response);
     }
   });
 
@@ -109,13 +116,15 @@ export const useCreateSubscriptionPlan = () => {
  */
 export const useUpdateSubscriptionPlan = () => {
   const { API } = useAPI();
+  const { getData } = useAPIHelper();
 
   const mutationResult = useMutation({
     mutation: async ({ id, data }: { id: string; data: SubscriptionPlanUpdateRequest }) => {
-      return API('/plans/${id}/', {
+      const response = await API(`/plans/${id}/`, {
         method: 'PATCH',
         body: data
       });
+      return getData<any>(response);
     }
   });
 
@@ -135,7 +144,7 @@ export const useDeleteSubscriptionPlan = () => {
 
   const mutationResult = useMutation({
     mutation: async (id: string) => {
-      return API('/plans/${id}/', {
+      return API(`/plans/${id}/`, {
         method: 'DELETE'
       });
     }
@@ -160,6 +169,7 @@ export const useDeleteSubscriptionPlan = () => {
 export const useFetchTransactions = () => {
   const route = useRoute();
   const { API } = useAPI();
+  const { getPaginatedResponse } = useAPIHelper();
 
   // Create a computed that will react to route changes
   const queryParams = computed(() => {
@@ -194,9 +204,10 @@ export const useFetchTransactions = () => {
       // Clean up undefined values
       Object.keys(params).forEach(key => (params[key] === undefined || params[key] === null) && delete params[key]);
 
-      return API('/transactions/', {
+      const response = await API('/transactions/', {
         params,
       });
+      return getPaginatedResponse<PaginatedTransactions['results'][0]>(response);
     },
     placeholderData: (previousData) => previousData,
   });
@@ -207,12 +218,14 @@ export const useFetchTransactions = () => {
  */
 export const useFetchTransactionById = (id: Ref<string | undefined>) => {
   const { API } = useAPI();
+  const { getData } = useAPIHelper();
 
   return useQuery<Transaction>({
     key: ['transactions', id],
     query: async () => {
       if (!id.value) return null;
-      return API('/transactions/${id.value}/');
+      const response = await API(`/transactions/${id.value}/`);
+      return getData<Transaction>(response);
     },
     enabled: computed(() => !!id.value)
   });
@@ -223,13 +236,15 @@ export const useFetchTransactionById = (id: Ref<string | undefined>) => {
  */
 export const useCreateTransaction = () => {
   const { API } = useAPI();
+  const { getData } = useAPIHelper();
 
   const mutationResult = useMutation({
     mutation: async (data: TransactionCreateRequest) => {
-      return API('/transactions/', {
+      const response = await API('/transactions/', {
         method: 'POST',
         body: data
       });
+      return getData<any>(response);
     }
   });
 
@@ -246,13 +261,15 @@ export const useCreateTransaction = () => {
  */
 export const useUpdateTransaction = () => {
   const { API } = useAPI();
+  const { getData } = useAPIHelper();
 
   const mutationResult = useMutation({
     mutation: async ({ id, data }: { id: string; data: TransactionUpdateRequest }) => {
-      return API('/transactions/${id}/', {
+      const response = await API(`/transactions/${id}/`, {
         method: 'PATCH',
         body: data
       });
+      return getData<any>(response);
     }
   });
 
@@ -272,7 +289,7 @@ export const useDeleteTransaction = () => {
 
   const mutationResult = useMutation({
     mutation: async (id: string) => {
-      return API('/transactions/${id}/', {
+      return API(`/transactions/${id}/`, {
         method: 'DELETE'
       });
     }
@@ -297,6 +314,7 @@ export const useDeleteTransaction = () => {
 export const useFetchHotelSubscriptions = () => {
   const route = useRoute();
   const { API } = useAPI();
+  const { getPaginatedResponse } = useAPIHelper();
 
   // Create a computed that will react to route changes
   const queryParams = computed(() => {
@@ -327,9 +345,10 @@ export const useFetchHotelSubscriptions = () => {
       // Clean up undefined values
       Object.keys(params).forEach(key => (params[key] === undefined || params[key] === null) && delete params[key]);
 
-      return API('/subscriptions/', {
+      const response = await API('/subscriptions/', {
         params,
       });
+      return getPaginatedResponse<PaginatedHotelSubscriptions['results'][0]>(response);
     },
     placeholderData: (previousData) => previousData,
   });
@@ -340,12 +359,14 @@ export const useFetchHotelSubscriptions = () => {
  */
 export const useFetchHotelSubscriptionById = (id: Ref<string | undefined>) => {
   const { API } = useAPI();
+  const { getData } = useAPIHelper();
 
   return useQuery<HotelSubscription>({
     key: ['hotel-subscriptions', id],
     query: async () => {
       if (!id.value) return null;
-      return API('/subscriptions/${id.value}/');
+      const response = await API(`/subscriptions/${id.value}/`);
+      return getData<HotelSubscription>(response);
     },
     enabled: computed(() => !!id.value)
   });
@@ -356,13 +377,15 @@ export const useFetchHotelSubscriptionById = (id: Ref<string | undefined>) => {
  */
 export const useCreateHotelSubscription = () => {
   const { API } = useAPI();
+  const { getData } = useAPIHelper();
 
   const mutationResult = useMutation({
     mutation: async (data: HotelSubscriptionCreateRequest) => {
-      return API('/subscriptions/create_subscription/', {
+      const response = await API('/subscriptions/create_subscription/', {
         method: 'POST',
         body: data
       });
+      return getData<any>(response);
     }
   });
 
@@ -379,13 +402,15 @@ export const useCreateHotelSubscription = () => {
  */
 export const useExtendHotelSubscription = () => {
   const { API } = useAPI();
+  const { getData } = useAPIHelper();
 
   const mutationResult = useMutation({
     mutation: async (data: HotelSubscriptionExtendRequest) => {
-      return API('/subscriptions/extend_subscription/', {
+      const response = await API('/subscriptions/extend_subscription/', {
         method: 'POST',
         body: data
       });
+      return getData<any>(response);
     }
   });
 
@@ -402,13 +427,15 @@ export const useExtendHotelSubscription = () => {
  */
 export const useUpdateHotelSubscription = () => {
   const { API } = useAPI();
+  const { getData } = useAPIHelper();
 
   const mutationResult = useMutation({
     mutation: async ({ id, data }: { id: string; data: HotelSubscriptionUpdateRequest }) => {
-      return API('/subscriptions/${id}/', {
+      const response = await API(`/subscriptions/${id}/`, {
         method: 'PATCH',
         body: data
       });
+      return getData<any>(response);
     }
   });
 
@@ -428,7 +455,7 @@ export const useDeleteHotelSubscription = () => {
 
   const mutationResult = useMutation({
     mutation: async (id: string) => {
-      return API('/subscriptions/${id}/', {
+      return API(`/subscriptions/${id}/`, {
         method: 'DELETE'
       });
     }

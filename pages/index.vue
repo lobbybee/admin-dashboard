@@ -128,12 +128,12 @@
                 <Icon name="prime:building" class="text-xl text-blue-600" />
               </div>
               <span class="text-xs font-medium text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
-                Total {{ data.hotels.total }}
+                Total {{ data?.hotels?.total || 0 }}
               </span>
             </div>
 
             <h3 class="text-2xl font-bold text-gray-900 mb-1">
-              {{ data.hotels.total.toLocaleString() }}
+              {{ data?.hotels?.total?.toLocaleString() || 0 }}
             </h3>
             <p class="text-sm text-gray-600">
               Hotels
@@ -143,13 +143,13 @@
               <div class="flex items-center gap-1">
                 <div class="status-indicator bg-green-500"></div>
                 <span class="text-gray-600">
-                  {{ data.hotels.verified }} verified
+                  {{ data?.hotels?.verified || 0 }} verified
                 </span>
               </div>
               <div class="flex items-center gap-1">
                 <div class="status-indicator bg-yellow-500"></div>
                 <span class="text-gray-600">
-                  {{ data.hotels.unverified }} pending
+                  {{ data?.hotels?.unverified || 0 }} pending
                 </span>
               </div>
             </div>
@@ -164,12 +164,12 @@
                 <Icon name="prime:comments" class="text-xl text-green-600" />
               </div>
               <span class="text-xs font-medium text-green-600 bg-green-100 px-2 py-1 rounded-full">
-                {{ data.conversations.active }} active
+                {{ data?.conversations?.active || 0 }} active
               </span>
             </div>
 
             <h3 class="text-2xl font-bold text-gray-900 mb-1">
-              {{ data.conversations.total.toLocaleString() }}
+              {{ data?.conversations?.total?.toLocaleString() || 0 }}
             </h3>
             <p class="text-sm text-gray-600">
               Conversations
@@ -179,13 +179,13 @@
               <div class="flex items-center gap-1">
                 <div class="status-indicator bg-green-500"></div>
                 <span class="text-gray-600">
-                  {{ data.conversations.closed }} closed
+                  {{ data?.conversations?.closed || 0 }} closed
                 </span>
               </div>
               <div class="flex items-center gap-1">
                 <div class="status-indicator bg-blue-500"></div>
                 <span class="text-gray-600">
-                  {{ data.conversations.fulfilled }} fulfilled
+                  {{ data?.conversations?.fulfilled || 0 }} fulfilled
                 </span>
               </div>
             </div>
@@ -200,12 +200,12 @@
                 <Icon name="prime:dollar" class="text-xl text-purple-600" />
               </div>
               <span class="text-xs font-medium text-purple-600 bg-purple-100 px-2 py-1 rounded-full">
-                {{ data.revenue.completed_transactions }} completed
+                {{ data?.revenue?.completed_transactions || 0 }} completed
               </span>
             </div>
 
             <h3 class="text-2xl font-bold text-gray-900 mb-1">
-              ${{ Number(data.revenue.total_revenue).toLocaleString() }}
+              ${{ Number(data?.revenue?.total_revenue || 0).toLocaleString() }}
             </h3>
             <p class="text-sm text-gray-600">
               Total Revenue
@@ -215,13 +215,13 @@
               <div class="flex items-center gap-1">
                 <div class="status-indicator bg-yellow-500"></div>
                 <span class="text-gray-600">
-                  {{ data.revenue.pending_transactions }} pending
+                  {{ data?.revenue?.pending_transactions || 0 }} pending
                 </span>
               </div>
               <div class="flex items-center gap-1">
                 <div class="status-indicator bg-green-500"></div>
                 <span class="text-gray-600">
-                  {{ data.revenue.active_subscriptions }} active
+                  {{ data?.revenue?.active_subscriptions || 0 }} active
                 </span>
               </div>
             </div>

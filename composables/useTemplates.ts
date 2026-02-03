@@ -1,13 +1,14 @@
 import { computed, type Ref } from 'vue';
 import { useAPI } from './useAPI';
+import { useAPIHelper } from './useAPIHelper';
 import { useRoute } from 'vue-router';
-import type { 
-  PaginatedTemplates, 
-  ListTemplatesParams, 
-  Template, 
-  TemplateUpdateRequest, 
-  TemplateVariablesResponse, 
-  TemplatePreviewResponse 
+import type {
+  PaginatedTemplates,
+  ListTemplatesParams,
+  Template,
+  TemplateUpdateRequest,
+  TemplateVariablesResponse,
+  TemplatePreviewResponse
 } from '~/types/templates';
 
 // --------------------------------------------------------------------------------
@@ -21,6 +22,7 @@ import type {
 export const useFetchTemplates = () => {
   const route = useRoute();
   const { API } = useAPI();
+  const { getPaginatedResponse } = useAPIHelper();
 
   // Create a computed that will react to route changes
   const queryParams = computed(() => {
@@ -31,7 +33,7 @@ export const useFetchTemplates = () => {
     if (route.query.search) queryKeyParams.search = route.query.search;
     if (route.query.template_type) queryKeyParams.template_type = route.query.template_type;
     if (route.query.is_active !== undefined) queryKeyParams.is_active = route.query.is_active;
-    
+
     return queryKeyParams;
   });
 
@@ -39,7 +41,7 @@ export const useFetchTemplates = () => {
     key: () => ['templates', queryParams.value], // Use a function to make the key reactive
     query: async () => {
       const query = route.query;
-      
+
       const params: ListTemplatesParams = {
         page: Number(query.page) || undefined,
         page_size: Number(query.page_size) || undefined,
@@ -51,9 +53,10 @@ export const useFetchTemplates = () => {
       // Clean up undefined values
       Object.keys(params).forEach(key => (params[key] === undefined || params[key] === null) && delete params[key]);
 
-      return API('/chat/templates/', {
+      const response = await API('/chat/templates/', {
         params,
       });
+      return getPaginatedResponse<PaginatedTemplates['results'][0]>(response);
     },
     placeholderData: (previousData) => previousData,
   });
@@ -64,12 +67,14 @@ export const useFetchTemplates = () => {
  */
 export const useFetchTemplateById = (id: Ref<string | undefined>) => {
   const { API } = useAPI();
+  const { getData } = useAPIHelper();
 
   return useQuery<Template>({
     key: ['templates', id],
     query: async () => {
       if (!id.value) return null;
-      return API(`/chat/templates/${id.value}/`);
+      const response = await API(`/chat/templates/${id.value}/`);
+      return getData<Template>(response);
     },
     enabled: computed(() => !!id.value)
   });
@@ -81,6 +86,7 @@ export const useFetchTemplateById = (id: Ref<string | undefined>) => {
  */
 export const useUpdateTemplate = () => {
   const { API } = useAPI();
+  const { getData } = useAPIHelper();
 
   const mutationResult = useMutation({
     mutation: async ({ id, data, hasMedia }: { id: string; data: TemplateUpdateRequest; hasMedia?: boolean }) => {
@@ -91,7 +97,7 @@ export const useUpdateTemplate = () => {
       if (hasMedia && data.media_file) {
         // Use multipart/form-data for media upload
         const formData = new FormData();
-        
+
         // Add all data fields to formData
         if (data.name !== undefined) formData.append('name', data.name);
         if (data.text_content !== undefined) formData.append('text_content', data.text_content);
@@ -107,7 +113,8 @@ export const useUpdateTemplate = () => {
         config.body = data;
       }
 
-      return API(`/chat/templates/${id}/`, config);
+      const response = await API(`/chat/templates/${id}/`, config);
+      return getData<any>(response);
     }
   });
 
@@ -124,11 +131,13 @@ export const useUpdateTemplate = () => {
  */
 export const useFetchTemplateVariables = () => {
   const { API } = useAPI();
+  const { getData } = useAPIHelper();
 
   return useQuery<TemplateVariablesResponse>({
     key: ['template-variables'],
     query: async () => {
-      return API('/chat/templates/variables/');
+      const response = await API('/chat/templates/variables/');
+      return getData<TemplateVariablesResponse>(response);
     },
   });
 };
@@ -138,12 +147,14 @@ export const useFetchTemplateVariables = () => {
  */
 export const useFetchTemplatePreview = (id: Ref<string | undefined>) => {
   const { API } = useAPI();
+  const { getData } = useAPIHelper();
 
   return useQuery<TemplatePreviewResponse>({
     key: ['template-preview', id],
     query: async () => {
       if (!id.value) return null;
-      return API(`/chat/templates/${id.value}/preview/`);
+      const response = await API(`/chat/templates/${id.value}/preview/`);
+      return getData<TemplatePreviewResponse>(response);
     },
     enabled: computed(() => !!id.value)
   });
@@ -154,10 +165,12 @@ export const useFetchTemplatePreview = (id: Ref<string | undefined>) => {
  */
 export const useManualTemplatePreview = () => {
   const { API } = useAPI();
+  const { getData } = useAPIHelper();
 
   return {
     fetchPreview: async (id: string): Promise<TemplatePreviewResponse> => {
-      return API(`/chat/templates/${id}/preview/`);
+      const response = await API(`/chat/templates/${id}/preview/`);
+      return getData<TemplatePreviewResponse>(response);
     }
   };
 };

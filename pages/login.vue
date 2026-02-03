@@ -80,8 +80,8 @@ async function handleLogin() {
       error.value = err.message
     }
     // Handle APIError specifically
-    else if (err instanceof APIError && err.data && err.data.detail) {
-      error.value = err.data.detail
+    else if (err instanceof APIError) {
+      error.value = err.message || (err.data && err.data.message) || 'An error occurred';
     } else if (err instanceof Error) {
       error.value = err.message || 'Invalid username or password'
     } else {

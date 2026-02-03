@@ -49,7 +49,7 @@
             class="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 max-h-60 overflow-y-auto"
           >
             <div
-              v-for="guest in guestSearchResults.results"
+              v-for="guest in guestSearchResults?.results"
               :key="guest.id"
               @click="selectGuestToFilter(guest)"
               class="p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0 flex items-center justify-between"
@@ -68,7 +68,7 @@
             </div>
 
             <div
-              v-if="guestSearchResults.count === 0"
+              v-if="guestSearchResults?.count === 0"
               class="p-4 text-center text-gray-500"
             >
               No guests found
@@ -171,7 +171,7 @@
       class="space-y-4"
     >
       <div
-        v-for="flag in data.results"
+        v-for="flag in data?.results"
         :key="flag.id"
         class="flag-card"
         :class="{ 'flag-police': flag.flagged_by_police }"
@@ -238,15 +238,15 @@
 
       <!-- Pagination -->
       <div
-        v-if="data.count > pageSize"
+        v-if="data?.count > pageSize"
         class="flex items-center justify-between mt-8"
       >
         <div class="text-sm text-gray-700">
-          Showing {{ (currentPage - 1) * pageSize + 1 }} to {{ Math.min(currentPage * pageSize, data.count) }} of {{ data.count }} results
+          Showing {{ (currentPage - 1) * pageSize + 1 }} to {{ Math.min(currentPage * pageSize, data?.count || 0) }} of {{ data?.count || 0 }} results
         </div>
         <div class="flex gap-2">
           <button
-            :disabled="!data.previous"
+            :disabled="!data?.previous"
             @click="goToPage(currentPage - 1)"
             class="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -256,7 +256,7 @@
             Page {{ currentPage }}
           </span>
           <button
-            :disabled="!data.next"
+            :disabled="!data?.next"
             @click="goToPage(currentPage + 1)"
             class="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -267,7 +267,7 @@
 
       <!-- Empty State -->
       <div
-        v-if="data.results.length === 0"
+        v-if="data?.results?.length === 0"
         class="text-center py-12"
       >
         <div class="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
@@ -330,7 +330,7 @@
                 class="mt-2 border border-gray-200 rounded-lg max-h-60 overflow-y-auto"
               >
                 <div
-                  v-for="guest in createFlagGuestSearchResults.results"
+                  v-for="guest in createFlagGuestSearchResults?.results"
                   :key="guest.id"
                   @click="selectGuest(guest)"
                   class="p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"

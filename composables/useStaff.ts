@@ -1,5 +1,6 @@
 import { computed, type Ref } from 'vue';
 import { useAPI } from './useAPI';
+import { useAPIHelper } from './useAPIHelper';
 import { useRoute } from 'vue-router';
 import type { PaginatedStaffUsers, ListStaffUsersParams, StaffUser, StaffUserCreateRequest, StaffUserUpdateRequest } from '~/types/staff';
 
@@ -14,6 +15,7 @@ import type { PaginatedStaffUsers, ListStaffUsersParams, StaffUser, StaffUserCre
 export const useFetchStaffUsers = () => {
   const route = useRoute();
   const { API } = useAPI();
+  const { getPaginatedResponse } = useAPIHelper();
 
   // Create a computed that will react to route changes
   const queryParams = computed(() => {
@@ -22,7 +24,7 @@ export const useFetchStaffUsers = () => {
     if (route.query.page) queryKeyParams.page = route.query.page;
     if (route.query.page_size) queryKeyParams.page_size = route.query.page_size;
     if (route.query.search) queryKeyParams.search = route.query.search;
-    
+
     return queryKeyParams;
   });
 
@@ -30,7 +32,7 @@ export const useFetchStaffUsers = () => {
     key: () => ['staff-users', queryParams.value], // Use a function to make the key reactive
     query: async () => {
       const query = route.query;
-      
+
       const params: ListStaffUsersParams = {
         page: Number(query.page) || undefined,
         page_size: Number(query.page_size) || undefined,
@@ -40,9 +42,10 @@ export const useFetchStaffUsers = () => {
       // Clean up undefined values
       Object.keys(params).forEach(key => (params[key] === undefined || params[key] === null) && delete params[key]);
 
-      return API('/admin/users/', {
+      const response = await API('/admin/users/', {
         params,
       });
+      return getPaginatedResponse<PaginatedStaffUsers['results'][0]>(response);
     },
     placeholderData: (previousData) => previousData,
   });
@@ -53,12 +56,14 @@ export const useFetchStaffUsers = () => {
  */
 export const useFetchStaffUserById = (id: Ref<string | undefined>) => {
   const { API } = useAPI();
+  const { getData } = useAPIHelper();
 
   return useQuery<StaffUser>({
     key: ['staff-users', id],
     query: async () => {
       if (!id.value) return null;
-      return API(`/admin/users/${id.value}/`);
+      const response = await API(`/admin/users/${id.value}/`);
+      return getData<StaffUser>(response);
     },
     enabled: computed(() => !!id.value)
   });
@@ -69,13 +74,15 @@ export const useFetchStaffUserById = (id: Ref<string | undefined>) => {
  */
 export const useCreateStaffUser = () => {
   const { API } = useAPI();
+  const { getData } = useAPIHelper();
 
   const mutationResult = useMutation({
     mutation: async (data: StaffUserCreateRequest) => {
-      return API('/admin/users/', {
+      const response = await API('/admin/users/', {
         method: 'POST',
         body: data
       });
+      return getData<any>(response);
     }
   });
 
@@ -92,13 +99,15 @@ export const useCreateStaffUser = () => {
  */
 export const useUpdateStaffUser = () => {
   const { API } = useAPI();
+  const { getData } = useAPIHelper();
 
   const mutationResult = useMutation({
     mutation: async ({ id, data }: { id: string; data: StaffUserUpdateRequest }) => {
-      return API(`/admin/users/${id}/`, {
+      const response = await API(`/admin/users/${id}/`, {
         method: 'PATCH',
         body: data
       });
+      return getData<any>(response);
     }
   });
 

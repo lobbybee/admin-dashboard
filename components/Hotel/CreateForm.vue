@@ -20,12 +20,12 @@
           <InputText
             id="hotel_name"
             v-model="formData.hotel_name"
-            :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-100': errors.hotel_name }"
+            :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-100': errors?.hotel_name }"
             placeholder="Enter hotel name"
             class="w-full"
           />
-          <small v-if="errors.hotel_name" class="text-red-500 text-sm">
-            {{ errors.hotel_name?._errors[0] }}
+          <small v-if="errors?.hotel_name" class="text-red-500 text-sm">
+            {{ errors.hotel_name._errors[0] }}
           </small>
           <small v-else class="text-gray-500 text-sm">The official name of the hotel</small>
         </div>
@@ -37,12 +37,12 @@
           <InputText
             id="email"
             v-model="formData.email"
-            :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-100': errors.email }"
+            :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-100': errors?.email }"
             placeholder="admin@hotel.com"
             class="w-full"
           />
-          <small v-if="errors.email" class="text-red-500 text-sm">
-            {{ errors.email?._errors[0] }}
+          <small v-if="errors?.email" class="text-red-500 text-sm">
+            {{ errors.email._errors[0] }}
           </small>
           <small v-else class="text-gray-500 text-sm">Email address for hotel administrator</small>
         </div>
@@ -69,12 +69,12 @@
           <InputText
             id="username"
             v-model="formData.username"
-            :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-100': errors.username }"
+            :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-100': errors?.username }"
             placeholder="Enter username"
             class="w-full"
           />
-          <small v-if="errors.username" class="text-red-500 text-sm">
-            {{ errors.username?._errors[0] }}
+          <small v-if="errors?.username" class="text-red-500 text-sm">
+            {{ errors.username._errors[0] }}
           </small>
           <small v-else class="text-gray-500 text-sm">Unique username for admin login</small>
         </div>
@@ -86,14 +86,14 @@
           <Password
             id="password"
             v-model="formData.password"
-            :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-100': errors.password }"
+            :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-100': errors?.password }"
             :feedback="false"
             toggleMask
             placeholder="Enter password"
-            class="w-full"
+
           />
-          <small v-if="errors.password" class="text-red-500 text-sm">
-            {{ errors.password?._errors[0] }}
+          <small v-if="errors?.password" class="text-red-500 text-sm">
+            {{ errors.password._errors[0] }}
           </small>
           <small v-else class="text-gray-500 text-sm">Minimum 8 characters</small>
         </div>
@@ -192,7 +192,10 @@ const emit = defineEmits<{
 const validationSchema = z.object({
   hotel_name: z.string().min(1, 'Hotel name is required'),
   email: z.string().email('Invalid email address'),
-  username: z.string().min(1, 'Username is required'),
+  username: z.string()
+    .min(1, 'Username is required')
+    .max(150, 'Username must be 150 characters or fewer')
+    .regex(/^[\w.@+-]+$/, 'Username can only contain letters, numbers, and @/./+/-/_ characters'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
   first_name: z.string().optional(),
   last_name: z.string().optional(),
@@ -209,7 +212,7 @@ const formData = reactive<CreateHotelData>({
   phone_number: '',
 });
 
-const errors = ref<z.ZodFormattedError<CreateHotelData> | {}>({});
+const errors = ref<z.ZodFormattedError<CreateHotelData> | null>(null);
 const isSubmitting = ref(false);
 
 const onSubmit = async () => {
@@ -219,7 +222,7 @@ const onSubmit = async () => {
     return;
   }
 
-  errors.value = {};
+  errors.value = null;
   isSubmitting.value = true;
   try {
     emit('submit', result.data);

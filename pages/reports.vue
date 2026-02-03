@@ -211,7 +211,7 @@
                   </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                  <tr v-for="hotel in hotelsData.data" :key="hotel.id">
+                  <tr v-for="hotel in hotelsData?.data" :key="hotel.id">
                     <td class="px-6 py-4 whitespace-nowrap">
                       <div class="text-sm font-medium text-gray-900">{{ hotel.name }}</div>
                     </td>
@@ -322,7 +322,7 @@
                   </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                  <tr v-for="conversation in conversationsData.data" :key="conversation.id">
+                  <tr v-for="conversation in conversationsData?.data" :key="conversation.id">
                     <td class="px-6 py-4 whitespace-nowrap">
                       <div class="text-sm font-medium text-gray-900">{{ conversation.hotel_name }}</div>
                     </td>
@@ -436,7 +436,7 @@
                   </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                  <tr v-for="payment in paymentsData.data" :key="payment.id">
+                  <tr v-for="payment in paymentsData?.data" :key="payment.id">
                     <td class="px-6 py-4 whitespace-nowrap">
                       <div class="text-sm font-medium text-gray-900">{{ payment.hotel_name }}</div>
                     </td>

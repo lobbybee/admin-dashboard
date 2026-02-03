@@ -2,6 +2,7 @@ export interface HotelDocument {
   id: string;
   document_type: string;
   document_file: string; // This is a URL
+  document_file_url?: string;
   uploaded_at: string;
   hotel: string;
 }
@@ -24,7 +25,15 @@ export interface Hotel {
   country: string;
   pincode: string;
   phone: string;
-  email: string;
+  google_review_link: string;
+  latitude: string;
+  longitude: string;
+  qr_code_url: string;
+  unique_qr_code: string;
+  check_in_time: string;
+  time_zone: string;
+  breakfast_reminder: boolean;
+  dinner_reminder: boolean;
   status: 'pending' | 'verified' | 'suspended' | 'rejected';
   is_verified: boolean;
   is_active: boolean;
