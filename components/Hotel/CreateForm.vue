@@ -201,7 +201,7 @@ const { checkUserExists } = useCheckUserExists();
 
 const validationSchema = z.object({
   hotel_name: z.string().min(1, 'Hotel name is required'),
-  email: z.string().email('Invalid email address'),
+  email: z.string().min(1, 'Email is required').email('Invalid email address'),
   username: z.string()
     .min(1, 'Username is required')
     .max(150, 'Username must be 150 characters or fewer')
@@ -209,7 +209,11 @@ const validationSchema = z.object({
   password: z.string().min(8, 'Password must be at least 8 characters'),
   first_name: z.string().optional(),
   last_name: z.string().optional(),
-  phone_number: z.string().optional(),
+  phone_number: z.string()
+    .optional()
+    .refine((val) => !val || /^[+]?[\d\s()-]{7,20}$/.test(val), {
+      message: 'Invalid phone number format'
+    }),
 });
 
 const formData = reactive<CreateHotelData>({

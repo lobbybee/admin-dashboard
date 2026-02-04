@@ -355,9 +355,13 @@ watch(() => props.user, (newUser) => {
 // Zod Schemas
 const baseSchema = z.object({
   username: z.string().min(1, 'Username is required'),
-  email: z.string().email('Invalid email address'),
+  email: z.string().min(1, 'Email is required').email('Invalid email address'),
   user_type: z.enum(['platform_admin', 'platform_staff']),
-  phone_number: z.string().optional(),
+  phone_number: z.string()
+    .optional()
+    .refine((val) => !val || /^[+]?[\d\s()-]{7,20}$/.test(val), {
+      message: 'Invalid phone number format'
+    }),
 });
 
 const createSchema = baseSchema.extend({
