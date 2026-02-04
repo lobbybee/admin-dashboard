@@ -37,12 +37,15 @@
           <InputText
             id="email"
             v-model="formData.email"
-            :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-100': errors?.email }"
+            :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-100': errors?.email || serverErrors.email }"
             placeholder="admin@hotel.com"
             class="w-full"
           />
           <small v-if="errors?.email" class="text-red-500 text-sm">
             {{ errors.email._errors[0] }}
+          </small>
+          <small v-else-if="serverErrors.email" class="text-red-500 text-sm">
+            {{ serverErrors.email }}
           </small>
           <small v-else class="text-gray-500 text-sm">Email address for hotel administrator</small>
         </div>
@@ -69,12 +72,15 @@
           <InputText
             id="username"
             v-model="formData.username"
-            :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-100': errors?.username }"
+            :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-100': errors?.username || serverErrors.username }"
             placeholder="Enter username"
             class="w-full"
           />
           <small v-if="errors?.username" class="text-red-500 text-sm">
             {{ errors.username._errors[0] }}
+          </small>
+          <small v-else-if="serverErrors.username" class="text-red-500 text-sm">
+            {{ serverErrors.username }}
           </small>
           <small v-else class="text-gray-500 text-sm">Unique username for admin login</small>
         </div>
@@ -177,17 +183,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue';
+import { ref, reactive, watch } from 'vue';
 import { z } from 'zod';
+import { useDebounceFn } from '@vueuse/core';
 import InputText from 'primevue/inputtext';
 import Password from 'primevue/password';
 import Button from 'primevue/button';
 import type { CreateHotelData } from '~/types/hotel';
+import { useCheckUserExists } from '~/composables/useStaff';
 
 const emit = defineEmits<{
   (e: 'submit', data: CreateHotelData): void;
   (e: 'cancel'): void;
 }>();
+
+const { checkUserExists } = useCheckUserExists();
 
 const validationSchema = z.object({
   hotel_name: z.string().min(1, 'Hotel name is required'),
@@ -213,9 +223,54 @@ const formData = reactive<CreateHotelData>({
 });
 
 const errors = ref<z.ZodFormattedError<CreateHotelData> | null>(null);
+const serverErrors = ref<{ username?: string; email?: string }>({});
 const isSubmitting = ref(false);
 
+// Debounced validation for username/email existence check
+const validateField = useDebounceFn(async (field: 'username' | 'email', value: string) => {
+  if (value.length < 3) {
+    serverErrors.value[field] = undefined;
+    return;
+  }
+
+  try {
+    const params = field === 'username' ? { username: value } : { email: value };
+    const data = await checkUserExists(params);
+
+    if (field === 'username' && data.username_exists) {
+      serverErrors.value.username = 'Username already taken';
+    } else if (field === 'username') {
+      serverErrors.value.username = undefined;
+    }
+
+    if (field === 'email' && data.email_exists) {
+      serverErrors.value.email = 'Email already taken';
+    } else if (field === 'email') {
+      serverErrors.value.email = undefined;
+    }
+  } catch {
+    // Silently fail on network errors during validation
+  }
+}, 500);
+
+// Watch for username changes
+watch(() => formData.username, (newVal) => {
+  if (newVal) validateField('username', newVal);
+  else serverErrors.value.username = undefined;
+});
+
+// Watch for email changes
+watch(() => formData.email, (newVal) => {
+  if (newVal) validateField('email', newVal);
+  else serverErrors.value.email = undefined;
+});
+
 const onSubmit = async () => {
+  // Check for server-side errors first
+  if (serverErrors.value.username || serverErrors.value.email) {
+    return;
+  }
+
   const result = validationSchema.safeParse(formData);
   if (!result.success) {
     errors.value = result.error.format();

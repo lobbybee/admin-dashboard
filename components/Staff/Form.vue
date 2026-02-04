@@ -42,17 +42,20 @@
                 v-model="formData.username"
                 type="text"
                 :disabled="isEdit"
-                :class="{ 'p-invalid': errors?.username }"
-                :aria-invalid="errors?.username ? 'true' : 'false'"
-                :aria-describedby="errors?.username ? 'username-error' : 'username-help'"
+                :class="{ 'p-invalid': errors?.username || serverErrors.username }"
+                :aria-invalid="errors?.username || serverErrors.username ? 'true' : 'false'"
+                :aria-describedby="errors?.username || serverErrors.username ? 'username-error' : 'username-help'"
                 placeholder="Enter username"
                 class="w-full"
               />
-              <small v-if="!errors?.username" id="username-help" class="text-gray-500 text-xs block">
+              <small v-if="!errors?.username && !serverErrors.username" id="username-help" class="text-gray-500 text-xs block">
                 Unique identifier for the staff member
               </small>
               <small v-if="errors?.username" id="username-error" class="p-error text-sm mt-1 block" role="alert">
                 {{ errors.username._errors[0] }}
+              </small>
+              <small v-else-if="serverErrors.username" id="username-error" class="p-error text-sm mt-1 block" role="alert">
+                {{ serverErrors.username }}
               </small>
             </div>
 
@@ -65,17 +68,20 @@
                 id="email"
                 v-model="formData.email"
                 type="email"
-                :class="{ 'p-invalid': errors?.email }"
-                :aria-invalid="errors?.email ? 'true' : 'false'"
-                :aria-describedby="errors?.email ? 'email-error' : 'email-help'"
+                :class="{ 'p-invalid': errors?.email || serverErrors.email }"
+                :aria-invalid="errors?.email || serverErrors.email ? 'true' : 'false'"
+                :aria-describedby="errors?.email || serverErrors.email ? 'email-error' : 'email-help'"
                 placeholder="staff@example.com"
                 class="w-full"
               />
-              <small v-if="!errors?.email" id="email-help" class="text-gray-500 text-xs block">
+              <small v-if="!errors?.email && !serverErrors.email" id="email-help" class="text-gray-500 text-xs block">
                 Staff member's professional email address
               </small>
               <small v-if="errors?.email" id="email-error" class="p-error text-sm mt-1 block" role="alert">
                 {{ errors.email._errors[0] }}
+              </small>
+              <small v-else-if="serverErrors.email" id="email-error" class="p-error text-sm mt-1 block" role="alert">
+                {{ serverErrors.email }}
               </small>
             </div>
           </div>
@@ -228,12 +234,14 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { z } from 'zod';
+import { useDebounceFn } from '@vueuse/core';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
 import Password from 'primevue/password';
 import Dropdown from 'primevue/dropdown';
 import type { StaffUser, StaffUserCreateRequest, StaffUserUpdateRequest } from '~/types/staff';
+import { useCheckUserExists } from '~/composables/useStaff';
 
 const props = defineProps<{
   visible: boolean;
@@ -248,6 +256,8 @@ const emit = defineEmits<{
 
 const isEdit = computed(() => !!props.user);
 
+const { checkUserExists } = useCheckUserExists();
+
 // Initialize form data with default values
 const formData = ref({
   username: '',
@@ -259,6 +269,57 @@ const formData = ref({
 });
 
 const errors = ref<z.ZodFormattedError<any> | null>(null);
+const serverErrors = ref<{ username?: string; email?: string }>({});
+
+// Debounced validation for username/email existence check
+const validateField = useDebounceFn(async (field: 'username' | 'email', value: string) => {
+  if (value.length < 3) {
+    serverErrors.value[field] = undefined;
+    return;
+  }
+
+  // Skip username validation when editing (username is disabled)
+  if (field === 'username' && isEdit.value) {
+    return;
+  }
+
+  // Skip email validation if it's the same as the original
+  if (field === 'email' && isEdit.value && props.user?.email === value) {
+    serverErrors.value.email = undefined;
+    return;
+  }
+
+  try {
+    const params = field === 'username' ? { username: value } : { email: value };
+    const data = await checkUserExists(params);
+
+    if (field === 'username' && data.username_exists) {
+      serverErrors.value.username = 'Username already taken';
+    } else if (field === 'username') {
+      serverErrors.value.username = undefined;
+    }
+
+    if (field === 'email' && data.email_exists) {
+      serverErrors.value.email = 'Email already taken';
+    } else if (field === 'email') {
+      serverErrors.value.email = undefined;
+    }
+  } catch {
+    // Silently fail on network errors during validation
+  }
+}, 500);
+
+// Watch for username changes (only for create mode)
+watch(() => formData.value.username, (newVal) => {
+  if (!isEdit.value && newVal) validateField('username', newVal);
+  else serverErrors.value.username = undefined;
+});
+
+// Watch for email changes
+watch(() => formData.value.email, (newVal) => {
+  if (newVal) validateField('email', newVal);
+  else serverErrors.value.email = undefined;
+});
 
 // Define user type options as a constant to avoid reactivity issues
 const userTypeOptions = [
@@ -288,6 +349,7 @@ watch(() => props.user, (newUser) => {
     };
   }
   errors.value = null;
+  serverErrors.value = {};
 }, { immediate: true });
 
 // Zod Schemas
@@ -328,6 +390,11 @@ const updateSchema = baseSchema.extend({
 });
 
 const handleSubmit = () => {
+  // Check for server-side errors first
+  if (serverErrors.value.username || serverErrors.value.email) {
+    return;
+  }
+
   const schema = isEdit.value ? updateSchema : createSchema;
   const result = schema.safeParse(formData.value);
 
