@@ -40,6 +40,7 @@
                                     size="small"
                                     severity="success"
                                     :loading="isSaving || updateLoading"
+                                    :disabled="!isDirty"
                                 />
                             </template>
                         </div>
@@ -1084,6 +1085,25 @@ const hotelFormData = computed(() => ({
     check_in_time: hotel.value?.check_in_time || "",
     time_zone: hotel.value?.time_zone || "",
 }));
+
+// Dirty check: compare editableFormData against hotelFormData
+const isDirty = computed(() => {
+    const original = hotelFormData.value;
+    const current = editableFormData.value;
+    return (Object.keys(original) as (keyof typeof original)[]).some((key) => {
+        const o = original[key];
+        const c = current[key];
+        // Treat null and '' as equivalent
+        if ((o === null || o === '') && (c === null || c === '')) return false;
+        // For check_in_time, compare after normalising Date → string
+        if (key === 'check_in_time' && c instanceof Date) {
+            const h = c.getHours().toString().padStart(2, '0');
+            const m = c.getMinutes().toString().padStart(2, '0');
+            return `${h}:${m}` !== o;
+        }
+        return o !== c;
+    });
+});
 
 // Edit mode states
 const isEditing = ref(false);

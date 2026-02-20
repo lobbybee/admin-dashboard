@@ -205,7 +205,7 @@
             </div>
 
             <h3 class="text-2xl font-bold text-gray-900 mb-1">
-              ${{ Number(data?.revenue?.total_revenue || 0).toLocaleString() }}
+              ₹{{ Number(data?.revenue?.total_revenue || 0).toLocaleString() }}
             </h3>
             <p class="text-sm text-gray-600">
               Total Revenue
