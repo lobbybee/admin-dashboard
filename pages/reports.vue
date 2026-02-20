@@ -396,7 +396,7 @@
           <div class="card">
             <div class="p-4">
               <div class="text-sm text-gray-600 mb-1">Total Revenue</div>
-              <div class="text-2xl font-bold text-green-600">${{ Number(paymentsData.summary.total_revenue).toLocaleString() }}</div>
+              <div class="text-2xl font-bold text-green-600">₹{{ Number(paymentsData.summary.total_revenue).toLocaleString() }}</div>
             </div>
           </div>
           <div class="card">
