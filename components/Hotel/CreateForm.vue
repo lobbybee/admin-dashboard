@@ -98,10 +98,10 @@
             placeholder="Enter password"
 
           />
-          <small v-if="errors?.password" class="text-red-500 text-sm">
+          <small v-if="errors?.password" class="text-red-500 text-sm block">
             {{ errors.password._errors[0] }}
           </small>
-          <small v-else class="text-gray-500 text-sm">Minimum 8 characters</small>
+          <small v-else class="text-gray-500 text-sm block">Minimum 8 characters</small>
         </div>
 
         <div class="space-y-2">

@@ -4,7 +4,7 @@
     @update:visible="$emit('update:visible', $event)"
     header="Create New Hotel"
     modal
-    class="w-full max-w-2xl"
+    :pt="{ root: { style: 'width: 56rem; max-width: 95vw' } }"
     :content-style="{ padding: 0 }"
   >
     <div class="p-6">

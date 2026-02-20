@@ -4,7 +4,7 @@
     @update:visible="$emit('update:visible', $event)"
     :header="`${isEdit ? 'Edit' : 'Add'} Staff Member`"
     modal
-    class="w-full max-w-2xl"
+    :pt="{ root: { style: 'width: 56rem; max-width: 95vw' } }"
     :content-style="{ padding: '0' }"
     :header-style="{ padding: '1.5rem', borderBottom: '1px solid #e5e7eb' }"
     :footer-style="{ padding: '1.5rem', borderTop: '1px solid #e5e7eb' }"
