@@ -1310,10 +1310,16 @@ const onDocumentUpload = async () => {
         };
 
         // Use the new smart composable - no documentId means use update-by-type endpoint
-        await updateHotelDocument({
+        const response = await updateHotelDocument({
             hotelId: hotel.value.id,
             data: documentData,
         });
+
+        // Optimistically add the uploaded document to the local list
+        if (hotel.value) {
+            if (!hotel.value.documents) hotel.value.documents = [];
+            hotel.value.documents.push(response);
+        }
 
         toast.add({
             severity: "success",
