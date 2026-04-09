@@ -2,12 +2,12 @@ export interface Flag {
   id: number;
   global_note: string;
   flagged_by_police: boolean;
+  is_active?: boolean;
   source: string;
   flagged_by: string;
   flagged_date: string;
   hotel_name: string | null;
   internal_rating: number | null;
-  reset_date?: string | null;
 }
 
 export interface FlagCreateRequest {

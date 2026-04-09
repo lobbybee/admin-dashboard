@@ -107,6 +107,7 @@ const navigation = [
   { name: 'Staff Management', href: '/staff', icon: 'prime:users' },
   { name: 'Message Templates', href: '/templates', icon: 'prime:comments' },
   { name: 'Payments', href: '/payments', icon: 'prime:credit-card' },
+  { name: 'Flags', href: '/flags', icon: 'prime:flag' },
   { name:'Reports', href:'/reports', icon:'prime:chart-bar'}
 ];
 

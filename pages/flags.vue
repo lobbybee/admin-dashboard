@@ -157,7 +157,7 @@
                 Rating: {{ flag.internal_rating }}/5
               </span>
               <button
-                v-if="!flag.reset_date"
+                v-if="flag.is_active !== false"
                 class="text-sm text-blue-600 hover:text-blue-800 font-medium"
                 @click="openResetModal(flag)"
               >
