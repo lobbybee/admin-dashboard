@@ -7,6 +7,7 @@ export interface Flag {
   flagged_date: string;
   hotel_name: string | null;
   internal_rating: number | null;
+  reset_date?: string | null;
 }
 
 export interface FlagCreateRequest {

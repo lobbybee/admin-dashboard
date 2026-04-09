@@ -1,4 +1,4 @@
-import { computed, type Ref } from 'vue';
+import { computed, toValue, type MaybeRefOrGetter, type Ref } from 'vue';
 import { useAPI } from './useAPI';
 import { useAPIHelper } from './useAPIHelper';
 import { useRoute } from 'vue-router';
@@ -144,18 +144,26 @@ export const useResetFlag = () => {
 /**
  * Searches guests globally by name, phone number, email, or registration number.
  */
-export const useSearchGuests = (query: Ref<string | undefined>, limit: Ref<number | undefined> = undefined) => {
+export const useSearchGuests = (
+  query: MaybeRefOrGetter<string | undefined>,
+  limit?: MaybeRefOrGetter<number | undefined>,
+) => {
   const { API } = useAPI();
   const { getData } = useAPIHelper();
+  const normalizedQuery = computed(() => {
+    const value = toValue(query)?.trim();
+    return value ? value : undefined;
+  });
+  const resolvedLimit = computed(() => toValue(limit));
 
   return useQuery<GuestSearchResponse>({
-    key: ['guest-search', query, limit],
+    key: () => ['guest-search', normalizedQuery.value ?? null, resolvedLimit.value ?? null],
     query: async () => {
-      if (!query.value || query.value.trim() === '') return null;
+      if (!normalizedQuery.value) return null;
 
       const params: SearchGuestsParams = {
-        q: query.value.trim(),
-        limit: limit?.value || undefined
+        q: normalizedQuery.value,
+        limit: resolvedLimit.value || undefined
       };
 
       // Clean up undefined values
@@ -166,6 +174,6 @@ export const useSearchGuests = (query: Ref<string | undefined>, limit: Ref<numbe
       });
       return getData<GuestSearchResponse>(response);
     },
-    enabled: computed(() => !!query.value && query.value.trim() !== '')
+    enabled: computed(() => !!normalizedQuery.value)
   });
 };
