@@ -430,6 +430,32 @@
                                     </template>
                                 </div>
 
+                                <div class="space-y-2">
+                                    <label
+                                        class="text-xs md:text-sm font-medium text-gray-700"
+                                        >Google Map Link</label
+                                    >
+                                    <template v-if="isEditing">
+                                        <InputText
+                                            v-model="
+                                                editableFormData.google_map_link
+                                            "
+                                            class="w-full"
+                                            placeholder="Enter Google map link"
+                                        />
+                                    </template>
+                                    <template v-else>
+                                        <p
+                                            class="text-sm text-gray-900 break-all"
+                                        >
+                                            {{
+                                                hotel.google_map_link ||
+                                                "Not provided"
+                                            }}
+                                        </p>
+                                    </template>
+                                </div>
+
                                 <!-- QR Code URL -->
                                 <!-- <div class="space-y-2">
                                     <label
@@ -463,13 +489,10 @@
                                     >
                                     <template v-if="isEditing">
                                         <DatePicker
-                                            v-model="
-                                                editableFormData.check_in_time
-                                            "
+                                            v-model="checkInTimeValue"
                                             time-only
                                             hour-format="24"
                                             :step-minute="15"
-                                            show-time
                                             class="w-full"
                                             placeholder="Select check-in time"
                                         />
@@ -478,6 +501,81 @@
                                         <p class="text-sm text-gray-900">
                                             {{
                                                 hotel.check_in_time ||
+                                                "Not provided"
+                                            }}
+                                        </p>
+                                    </template>
+                                </div>
+
+                                <div class="space-y-2">
+                                    <label
+                                        class="text-xs md:text-sm font-medium text-gray-700"
+                                        >Breakfast Time</label
+                                    >
+                                    <template v-if="isEditing">
+                                        <DatePicker
+                                            v-model="breakfastTimeValue"
+                                            time-only
+                                            hour-format="24"
+                                            :step-minute="15"
+                                            class="w-full"
+                                            placeholder="Select breakfast time"
+                                        />
+                                    </template>
+                                    <template v-else>
+                                        <p class="text-sm text-gray-900">
+                                            {{
+                                                hotel.breakfast_time ||
+                                                "Not provided"
+                                            }}
+                                        </p>
+                                    </template>
+                                </div>
+
+                                <div class="space-y-2">
+                                    <label
+                                        class="text-xs md:text-sm font-medium text-gray-700"
+                                        >Lunch Time</label
+                                    >
+                                    <template v-if="isEditing">
+                                        <DatePicker
+                                            v-model="lunchTimeValue"
+                                            time-only
+                                            hour-format="24"
+                                            :step-minute="15"
+                                            class="w-full"
+                                            placeholder="Select lunch time"
+                                        />
+                                    </template>
+                                    <template v-else>
+                                        <p class="text-sm text-gray-900">
+                                            {{
+                                                hotel.lunch_time ||
+                                                "Not provided"
+                                            }}
+                                        </p>
+                                    </template>
+                                </div>
+
+                                <div class="space-y-2">
+                                    <label
+                                        class="text-xs md:text-sm font-medium text-gray-700"
+                                        >Dinner Time</label
+                                    >
+                                    <template v-if="isEditing">
+                                        <DatePicker
+                                            v-model="dinnerTimeValue"
+                                            time-only
+                                            hour-format="24"
+                                            :step-minute="15"
+                                            class="w-full"
+                                            placeholder="Select dinner time"
+                                        />
+                                    </template>
+                                    <template v-else>
+                                        <p class="text-sm text-gray-900">
+                                            {{
+                                                hotel.dinner_time ||
                                                 "Not provided"
                                             }}
                                         </p>
@@ -510,6 +608,82 @@
                                             }}
                                         </p>
                                     </template>
+                                </div>
+
+                                <div class="space-y-2 md:col-span-2">
+                                    <label
+                                        class="text-xs md:text-sm font-medium text-gray-700"
+                                        >Reminders</label
+                                    >
+                                    <div
+                                        class="grid grid-cols-1 md:grid-cols-2 gap-4"
+                                    >
+                                        <div
+                                            class="flex items-center justify-between rounded-lg border border-gray-200 px-4 py-3"
+                                        >
+                                            <div>
+                                                <p
+                                                    class="text-sm font-medium text-gray-900"
+                                                >
+                                                    Breakfast Reminder
+                                                </p>
+                                                <p class="text-xs text-gray-500">
+                                                    Enable breakfast reminders
+                                                </p>
+                                            </div>
+                                            <template v-if="isEditing">
+                                                <ToggleSwitch
+                                                    v-model="
+                                                        editableFormData.breakfast_reminder
+                                                    "
+                                                />
+                                            </template>
+                                            <template v-else>
+                                                <span
+                                                    class="text-sm text-gray-900"
+                                                >
+                                                    {{
+                                                        hotel.breakfast_reminder
+                                                            ? "Enabled"
+                                                            : "Disabled"
+                                                    }}
+                                                </span>
+                                            </template>
+                                        </div>
+
+                                        <div
+                                            class="flex items-center justify-between rounded-lg border border-gray-200 px-4 py-3"
+                                        >
+                                            <div>
+                                                <p
+                                                    class="text-sm font-medium text-gray-900"
+                                                >
+                                                    Dinner Reminder
+                                                </p>
+                                                <p class="text-xs text-gray-500">
+                                                    Enable dinner reminders
+                                                </p>
+                                            </div>
+                                            <template v-if="isEditing">
+                                                <ToggleSwitch
+                                                    v-model="
+                                                        editableFormData.dinner_reminder
+                                                    "
+                                                />
+                                            </template>
+                                            <template v-else>
+                                                <span
+                                                    class="text-sm text-gray-900"
+                                                >
+                                                    {{
+                                                        hotel.dinner_reminder
+                                                            ? "Enabled"
+                                                            : "Disabled"
+                                                    }}
+                                                </span>
+                                            </template>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -1024,7 +1198,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import Button from "primevue/button";
 import Dialog from "primevue/dialog";
 import Textarea from "primevue/textarea";
@@ -1037,6 +1211,7 @@ import InputNumber from "primevue/inputnumber";
 import Dropdown from "primevue/dropdown";
 import FileUpload from "primevue/fileupload";
 import DatePicker from "primevue/datepicker";
+import ToggleSwitch from "primevue/toggleswitch";
 import { useToast } from "primevue/usetoast";
 import StatusBadge from "./StatusBadge.vue";
 import {
@@ -1075,6 +1250,7 @@ const hotelFormData = computed(() => ({
     phone: hotel.value?.phone || "",
     email: hotel.value?.email || "",
     google_review_link: hotel.value?.google_review_link || "",
+    google_map_link: hotel.value?.google_map_link || "",
     latitude: hotel.value?.latitude
         ? parseFloat(hotel.value.latitude)
         : null,
@@ -1083,7 +1259,12 @@ const hotelFormData = computed(() => ({
         : null,
     qr_code_url: hotel.value?.qr_code_url || "",
     check_in_time: hotel.value?.check_in_time || "",
+    breakfast_time: hotel.value?.breakfast_time || "",
+    lunch_time: hotel.value?.lunch_time || "",
+    dinner_time: hotel.value?.dinner_time || "",
     time_zone: hotel.value?.time_zone || "",
+    breakfast_reminder: hotel.value?.breakfast_reminder ?? true,
+    dinner_reminder: hotel.value?.dinner_reminder ?? true,
 }));
 
 // Dirty check: compare editableFormData against hotelFormData
@@ -1119,11 +1300,17 @@ const editableFormData = ref({
     phone: "",
     email: "",
     google_review_link: "",
+    google_map_link: "",
     latitude: null as number | null,
     longitude: null as number | null,
     qr_code_url: "",
     check_in_time: "",
+    breakfast_time: "",
+    lunch_time: "",
+    dinner_time: "",
     time_zone: "",
+    breakfast_reminder: true,
+    dinner_reminder: true,
 });
 
 // Watch for changes to hotel data and sync with editable form
@@ -1343,6 +1530,48 @@ const getTimezoneLabel = (timezoneValue: string | undefined) => {
     return timezone ? timezone.label : timezoneValue;
 };
 
+const stringToTimeDate = (value: string | undefined) => {
+    if (!value) return null;
+    const match = value.match(/(\d{1,2}):(\d{2})/);
+    if (!match) return null;
+
+    const date = new Date();
+    date.setHours(parseInt(match[1], 10), parseInt(match[2], 10), 0, 0);
+    return date;
+};
+
+const formatTimeValue = (value: Date | string | null) => {
+    if (!value) return "";
+
+    if (value instanceof Date) {
+        const hours = value.getHours().toString().padStart(2, "0");
+        const minutes = value.getMinutes().toString().padStart(2, "0");
+        return `${hours}:${minutes}:00`;
+    }
+
+    const match = value.match(/(\d{1,2}):(\d{2})(?::\d{2})?/);
+    if (!match) return value;
+
+    const hours = parseInt(match[1], 10).toString().padStart(2, "0");
+    const minutes = parseInt(match[2], 10).toString().padStart(2, "0");
+    return `${hours}:${minutes}:00`;
+};
+
+const createTimeFieldModel = (
+    field: "check_in_time" | "breakfast_time" | "lunch_time" | "dinner_time",
+) =>
+    computed({
+        get: () => stringToTimeDate(editableFormData.value[field]),
+        set: (value: Date | null) => {
+            editableFormData.value[field] = formatTimeValue(value);
+        },
+    });
+
+const checkInTimeValue = createTimeFieldModel("check_in_time");
+const breakfastTimeValue = createTimeFieldModel("breakfast_time");
+const lunchTimeValue = createTimeFieldModel("lunch_time");
+const dinnerTimeValue = createTimeFieldModel("dinner_time");
+
 // Function to toggle upload form visibility
 const toggleUploadForm = () => {
     showUploadForm.value = !showUploadForm.value;
@@ -1373,26 +1602,12 @@ const saveHotelDetails = async () => {
                 editableFormData.value[key as keyof typeof editableFormData.value];
 
             // Format time value to ensure it's in HH:MM format
-            if (key === 'check_in_time' && value) {
+            if (
+                ["check_in_time", "breakfast_time", "lunch_time", "dinner_time"].includes(key) &&
+                value
+            ) {
                 // Convert Date object or time string to HH:MM format
-                if (value instanceof Date) {
-                    const hours = value.getHours().toString().padStart(2, '0');
-                    const minutes = value.getMinutes().toString().padStart(2, '0');
-                    updateData[key] = `${hours}:${minutes}`;
-                } else if (typeof value === 'string') {
-                    // If it's already a string, ensure it's in HH:MM format
-                    // Handle various possible input formats
-                    const timeMatch = value.match(/(\d{1,2}):(\d{2})(?::\d{2})?/);
-                    if (timeMatch) {
-                        const hours = parseInt(timeMatch[1]).toString().padStart(2, '0');
-                        const minutes = parseInt(timeMatch[2]).toString().padStart(2, '0');
-                        updateData[key] = `${hours}:${minutes}`;
-                    } else {
-                        updateData[key] = value;
-                    }
-                } else {
-                    updateData[key] = value;
-                }
+                updateData[key] = formatTimeValue(value as Date | string);
             } else if (value !== "" && value !== null) {
                 updateData[key] = value;
             }
