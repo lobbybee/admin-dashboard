@@ -616,10 +616,10 @@
                                         >Reminders</label
                                     >
                                     <div
-                                        class="grid grid-cols-1 md:grid-cols-3 gap-4"
+                                        class="flex flex-wrap gap-4"
                                     >
                                         <div
-                                            class="flex items-center justify-between rounded-lg border border-gray-200 px-4 py-3"
+                                            class="flex items-center justify-between rounded-lg border border-gray-200 px-4 py-3 min-w-[260px] flex-1"
                                         >
                                             <div>
                                                 <p
@@ -652,7 +652,7 @@
                                         </div>
 
                                         <div
-                                            class="flex items-center justify-between rounded-lg border border-gray-200 px-4 py-3"
+                                            class="flex items-center justify-between rounded-lg border border-gray-200 px-4 py-3 min-w-[260px] flex-1"
                                         >
                                             <div>
                                                 <p
@@ -685,7 +685,7 @@
                                         </div>
 
                                         <div
-                                            class="flex items-center justify-between rounded-lg border border-gray-200 px-4 py-3"
+                                            class="flex items-center justify-between rounded-lg border border-gray-200 px-4 py-3 min-w-[260px] flex-1"
                                         >
                                             <div>
                                                 <p
