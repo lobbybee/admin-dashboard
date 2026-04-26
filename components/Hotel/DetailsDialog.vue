@@ -616,7 +616,7 @@
                                         >Reminders</label
                                     >
                                     <div
-                                        class="grid grid-cols-1 md:grid-cols-2 gap-4"
+                                        class="grid grid-cols-1 md:grid-cols-3 gap-4"
                                     >
                                         <div
                                             class="flex items-center justify-between rounded-lg border border-gray-200 px-4 py-3"
@@ -644,6 +644,39 @@
                                                 >
                                                     {{
                                                         hotel.breakfast_reminder
+                                                            ? "Enabled"
+                                                            : "Disabled"
+                                                    }}
+                                                </span>
+                                            </template>
+                                        </div>
+
+                                        <div
+                                            class="flex items-center justify-between rounded-lg border border-gray-200 px-4 py-3"
+                                        >
+                                            <div>
+                                                <p
+                                                    class="text-sm font-medium text-gray-900"
+                                                >
+                                                    Lunch Reminder
+                                                </p>
+                                                <p class="text-xs text-gray-500">
+                                                    Enable lunch reminders
+                                                </p>
+                                            </div>
+                                            <template v-if="isEditing">
+                                                <ToggleSwitch
+                                                    v-model="
+                                                        editableFormData.lunch_reminder
+                                                    "
+                                                />
+                                            </template>
+                                            <template v-else>
+                                                <span
+                                                    class="text-sm text-gray-900"
+                                                >
+                                                    {{
+                                                        hotel.lunch_reminder
                                                             ? "Enabled"
                                                             : "Disabled"
                                                     }}
@@ -1264,6 +1297,7 @@ const hotelFormData = computed(() => ({
     dinner_time: hotel.value?.dinner_time || "",
     time_zone: hotel.value?.time_zone || "",
     breakfast_reminder: hotel.value?.breakfast_reminder ?? true,
+    lunch_reminder: hotel.value?.lunch_reminder ?? true,
     dinner_reminder: hotel.value?.dinner_reminder ?? true,
 }));
 
@@ -1310,6 +1344,7 @@ const editableFormData = ref({
     dinner_time: "",
     time_zone: "",
     breakfast_reminder: true,
+    lunch_reminder: true,
     dinner_reminder: true,
 });
 
