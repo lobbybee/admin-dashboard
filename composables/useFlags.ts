@@ -2,6 +2,7 @@ import { computed, toValue, type MaybeRefOrGetter, type Ref } from 'vue';
 import { useAPI } from './useAPI';
 import { useAPIHelper } from './useAPIHelper';
 import { useRoute } from 'vue-router';
+import { VALID_PAGE_SIZES } from '~/types/flags';
 import type { PaginatedFlags, ListFlagsParams, Flag, FlagCreateRequest, FlagResetRequest, GuestFlagCheck, GuestSearchResponse, SearchGuestsParams } from '~/types/flags';
 
 // --------------------------------------------------------------------------------
@@ -24,7 +25,6 @@ export const useFetchFlags = () => {
     if (route.query.page) queryKeyParams.page = route.query.page;
     if (route.query.page_size) queryKeyParams.page_size = route.query.page_size;
     if (route.query.guest_id) queryKeyParams.guest_id = route.query.guest_id;
-    if (route.query.hotel_id) queryKeyParams.hotel_id = route.query.hotel_id;
     if (route.query.active_only !== undefined) queryKeyParams.active_only = route.query.active_only;
 
     return queryKeyParams;
@@ -35,11 +35,14 @@ export const useFetchFlags = () => {
     query: async () => {
       const query = route.query;
 
+      // Clamped to the sizes the UI offers so the server cannot quietly return a
+      // different page size than the one the pagination label is computed from.
+      const requestedPageSize = Number(query.page_size);
+
       const params: ListFlagsParams = {
         page: Number(query.page) || undefined,
-        page_size: Number(query.page_size) || undefined,
+        page_size: VALID_PAGE_SIZES.includes(requestedPageSize) ? requestedPageSize : undefined,
         guest_id: Number(query.guest_id) || undefined,
-        hotel_id: Number(query.hotel_id) || undefined,
         active_only: query.active_only === 'true' ? true : query.active_only === 'false' ? false : undefined,
       };
 
@@ -84,7 +87,7 @@ export const useCheckGuestFlags = (guestId: Ref<number | undefined>) => {
     key: ['guest-flags-check', guestId],
     query: async () => {
       if (!guestId.value) return null;
-      const response = await API(`/admin/flags/check/${guestId.value}/`);
+      const response = await API(`/flags/check/${guestId.value}/`);
       return getData<GuestFlagCheck>(response);
     },
     enabled: computed(() => !!guestId.value)

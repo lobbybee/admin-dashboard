@@ -941,17 +941,19 @@
                                             </div>
                                         </template>
                                     </Column>
-                                    <Column header="Actions">
+                                    <Column header="Document">
                                         <template #body="{ data }">
-                                            <a
-                                                :href="data.document_file_url"
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
+                                            <FilePreview
+                                                :url="data.document_file_url"
+                                                :label="`${data.document_type} document`"
+                                                size="sm"
+                                            />
+                                            <span
+                                                v-if="!data.document_file_url"
+                                                class="text-sm text-gray-500"
                                             >
-                                                <i class="pi pi-eye"></i>
-                                                View Document
-                                            </a>
+                                                No file
+                                            </span>
                                         </template>
                                     </Column>
                                 </DataTable>
@@ -1284,6 +1286,7 @@ import DatePicker from "primevue/datepicker";
 import ToggleSwitch from "primevue/toggleswitch";
 import { useToast } from "primevue/usetoast";
 import StatusBadge from "./StatusBadge.vue";
+import FilePreview from "../FilePreview.vue";
 import LogoUpload from "./LogoUpload.vue";
 import StaffTab from "./StaffTab.vue";
 import {
