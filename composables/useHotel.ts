@@ -2,7 +2,7 @@ import { computed, type Ref } from 'vue';
 import { useAPI } from './useAPI';
 import { useAPIHelper } from './useAPIHelper';
 import { useRoute } from 'vue-router';
-import type { PaginatedHotels, ListHotelsParams, Hotel, VerifyHotelData, RejectHotelData, CreateHotelData, UpdateHotelData, UpdateHotelDocumentData } from '~/types/hotel';
+import type { PaginatedHotels, ListHotelsParams, Hotel, VerifyHotelData, RejectHotelData, CreateHotelData, UpdateHotelData, UpdateHotelDocumentData, HotelStaffUser, ResetStaffPasswordData } from '~/types/hotel';
 
 // --------------------------------------------------------------------------------
 // Composables
@@ -193,6 +193,77 @@ export const useUpdateHotel = () => {
 
   return {
     updateHotel: mutationResult.mutateAsync,
+    status: mutationResult.status,
+    error: mutationResult.error,
+    isLoading: mutationResult.isLoading,
+  };
+};
+
+/**
+ * Lists every staff account belonging to a hotel.
+ */
+export const useFetchHotelStaff = (id: Ref<string | undefined>) => {
+  const { API } = useAPI();
+  const { getData } = useAPIHelper();
+
+  return useQuery<HotelStaffUser[]>({
+    key: () => ['hotel-staff', id.value ?? ''],
+    query: async () => {
+      if (!id.value) return [];
+      const response = await API(`/admin/hotels/${id.value}/staff/`);
+      return getData<HotelStaffUser[]>(response);
+    },
+    enabled: computed(() => !!id.value)
+  });
+};
+
+/**
+ * Sets a new password for one of a hotel's staff accounts.
+ */
+export const useResetHotelStaffPassword = () => {
+  const { API } = useAPI();
+  const { getData } = useAPIHelper();
+
+  const mutationResult = useMutation({
+    mutation: async ({ hotelId, data }: { hotelId: string; data: ResetStaffPasswordData }) => {
+      const response = await API(`/admin/hotels/${hotelId}/reset-staff-password/`, {
+        method: 'POST',
+        body: data
+      });
+      return getData<any>(response);
+    }
+  });
+
+  return {
+    resetStaffPassword: mutationResult.mutateAsync,
+    status: mutationResult.status,
+    error: mutationResult.error,
+    isLoading: mutationResult.isLoading,
+  };
+};
+
+/**
+ * Uploads or clears the hotel logo. Pass null to remove it.
+ */
+export const useUpdateHotelLogo = () => {
+  const { API } = useAPI();
+  const { getData } = useAPIHelper();
+
+  const mutationResult = useMutation({
+    mutation: async ({ id, logo }: { id: string; logo: File | null }) => {
+      const formData = new FormData();
+      formData.append('logo', logo ?? ''); // empty string clears it
+      // No Content-Type header: the browser must set it with the multipart boundary.
+      const response = await API(`/admin/hotels/${id}/`, {
+        method: 'PATCH',
+        body: formData,
+      });
+      return getData<any>(response);
+    }
+  });
+
+  return {
+    updateHotelLogo: mutationResult.mutateAsync,
     status: mutationResult.status,
     error: mutationResult.error,
     isLoading: mutationResult.isLoading,

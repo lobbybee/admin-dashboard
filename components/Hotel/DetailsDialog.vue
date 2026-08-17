@@ -71,6 +71,13 @@
                             </div>
 
                             <div class="space-y-4">
+                                <!-- Logo -->
+                                <LogoUpload
+                                    :hotel-id="hotel.id"
+                                    :logo-url="hotel.logo_url"
+                                    @updated="emit('hotel-updated')"
+                                />
+
                                 <!-- Hotel Name and Status -->
                                 <div
                                     class="grid grid-cols-1 md:grid-cols-2 gap-4"
@@ -501,6 +508,32 @@
                                         <p class="text-sm text-gray-900">
                                             {{
                                                 hotel.check_in_time ||
+                                                "Not provided"
+                                            }}
+                                        </p>
+                                    </template>
+                                </div>
+
+                                <!-- Check-out Time -->
+                                <div class="space-y-2">
+                                    <label
+                                        class="text-xs md:text-sm font-medium text-gray-700"
+                                        >Check-out Time</label
+                                    >
+                                    <template v-if="isEditing">
+                                        <DatePicker
+                                            v-model="checkOutTimeValue"
+                                            time-only
+                                            hour-format="24"
+                                            :step-minute="15"
+                                            class="w-full"
+                                            placeholder="Select check-out time"
+                                        />
+                                    </template>
+                                    <template v-else>
+                                        <p class="text-sm text-gray-900">
+                                            {{
+                                                hotel.check_out_time ||
                                                 "Not provided"
                                             }}
                                         </p>
@@ -1064,6 +1097,10 @@
                     </div>
                 </TabPanel>
 
+                <TabPanel header="Staff">
+                    <StaffTab :hotel-id="hotel.id" />
+                </TabPanel>
+
                 <TabPanel header="Actions">
                     <div class="p-6">
                         <div
@@ -1247,6 +1284,8 @@ import DatePicker from "primevue/datepicker";
 import ToggleSwitch from "primevue/toggleswitch";
 import { useToast } from "primevue/usetoast";
 import StatusBadge from "./StatusBadge.vue";
+import LogoUpload from "./LogoUpload.vue";
+import StaffTab from "./StaffTab.vue";
 import {
     useVerifyHotel,
     useToggleHotelActive,
@@ -1292,6 +1331,7 @@ const hotelFormData = computed(() => ({
         : null,
     qr_code_url: hotel.value?.qr_code_url || "",
     check_in_time: hotel.value?.check_in_time || "",
+    check_out_time: hotel.value?.check_out_time || "",
     breakfast_time: hotel.value?.breakfast_time || "",
     lunch_time: hotel.value?.lunch_time || "",
     dinner_time: hotel.value?.dinner_time || "",
@@ -1339,6 +1379,7 @@ const editableFormData = ref({
     longitude: null as number | null,
     qr_code_url: "",
     check_in_time: "",
+    check_out_time: "",
     breakfast_time: "",
     lunch_time: "",
     dinner_time: "",
@@ -1593,7 +1634,12 @@ const formatTimeValue = (value: Date | string | null) => {
 };
 
 const createTimeFieldModel = (
-    field: "check_in_time" | "breakfast_time" | "lunch_time" | "dinner_time",
+    field:
+        | "check_in_time"
+        | "check_out_time"
+        | "breakfast_time"
+        | "lunch_time"
+        | "dinner_time",
 ) =>
     computed({
         get: () => stringToTimeDate(editableFormData.value[field]),
@@ -1603,6 +1649,7 @@ const createTimeFieldModel = (
     });
 
 const checkInTimeValue = createTimeFieldModel("check_in_time");
+const checkOutTimeValue = createTimeFieldModel("check_out_time");
 const breakfastTimeValue = createTimeFieldModel("breakfast_time");
 const lunchTimeValue = createTimeFieldModel("lunch_time");
 const dinnerTimeValue = createTimeFieldModel("dinner_time");
@@ -1638,7 +1685,7 @@ const saveHotelDetails = async () => {
 
             // Format time value to ensure it's in HH:MM format
             if (
-                ["check_in_time", "breakfast_time", "lunch_time", "dinner_time"].includes(key) &&
+                ["check_in_time", "check_out_time", "breakfast_time", "lunch_time", "dinner_time"].includes(key) &&
                 value
             ) {
                 // Convert Date object or time string to HH:MM format

@@ -15,9 +15,26 @@ export interface HotelAdmin {
   phone_number: string;
 }
 
+export interface HotelStaffUser {
+  id: number;
+  username: string;
+  email: string;
+  user_type: string;
+  phone_number: string;
+  is_active_hotel_user: boolean;
+  is_verified: boolean;
+  department: string | string[] | null;
+}
+
+export interface ResetStaffPasswordData {
+  user_id: number;
+  new_password: string;
+}
+
 export interface Hotel {
   id: string;
   name: string;
+  logo_url: string | null;
   description: string;
   address: string;
   city: string;
@@ -25,14 +42,21 @@ export interface Hotel {
   country: string;
   pincode: string;
   phone: string;
+  email: string;
   google_review_link: string;
+  google_map_link: string;
   latitude: string;
   longitude: string;
   qr_code_url: string;
   unique_qr_code: string;
   check_in_time: string;
+  check_out_time: string;
   time_zone: string;
+  breakfast_time: string | null;
+  lunch_time: string | null;
+  dinner_time: string | null;
   breakfast_reminder: boolean;
+  lunch_reminder: boolean;
   dinner_reminder: boolean;
   status: 'pending' | 'verified' | 'suspended' | 'rejected';
   is_verified: boolean;
@@ -93,11 +117,20 @@ export interface UpdateHotelData {
   phone?: string;
   email?: string;
   google_review_link?: string;
+  google_map_link?: string;
   latitude?: number;
   longitude?: number;
   qr_code_url?: string;
   check_in_time?: string;
+  check_out_time?: string;
   time_zone?: string;
+  breakfast_time?: string;
+  lunch_time?: string;
+  dinner_time?: string;
+  breakfast_reminder?: boolean;
+  lunch_reminder?: boolean;
+  dinner_reminder?: boolean;
+  logo?: File | '';
 }
 
 export interface UpdateHotelDocumentData {
